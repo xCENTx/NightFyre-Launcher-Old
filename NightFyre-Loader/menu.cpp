@@ -24,11 +24,11 @@ void _MAINMENU()
     std::cout << "       _____________________________    __________________________ \n";
     std::cout << "      |------------GAMES------------|  |  YouTube -> NightFyreTV  |\n";
     std::cout << "      | [1] SOCOM SERIES     (PCSX2)|  |  Discord -> xCENTx#0001  |\n";
-    std::cout << "      | [2] Far Cry 3               |  |  GitHub  -> xCENTx       |\n";
-    std::cout << "      | [3] Assault Cube            |  |-----Special-Mentions-----|\n";
+    std::cout << "      | [2] Call of Duty Series     |  |  GitHub  -> xCENTx       |\n";
+    std::cout << "      | [3] Far Cry 3               |  |-----Special-Mentions-----|\n";
     std::cout << "      | [4] Binding of Isaac        |  |  - GuidedHacking.com     |\n";
     std::cout << "      | [5] Final Fantasy 7  (ePSXe)|  |  - UnknownCheats.com     |\n";
-    std::cout << "      | [6]                         |  |  - Cronotrigga           |\n";
+    std::cout << "      | [6] Assault Cube            |  |  - Cronotrigga           |\n";
     std::cout << "      | [7]                         |  |  - bismofunyuns          |\n";
     std::cout << "      | [8]                         |  |  - Bravo                 |\n";
     std::cout << "      | [9] Deathly Stillness       |  |  - Harry62               |\n";
@@ -46,7 +46,7 @@ void _MAINMENU()
                /$$  \ $$                            /$$  | $$                    
               |  $$$$$$/                           |  $$$$$$/                    
                \______/                             \______/                     
-                       v0.0.4 (alpha - [VIP] preview)
+                       v0.0.5 (alpha - [VIP] preview)
 )" << std::endl;
 }
 
@@ -63,7 +63,75 @@ void MENU_SOCOM_SELECT()
     std::cout << "| [END] QUIT                |\n";
     std::cout << "|---------NightFyre---------| v1.0" << std::endl;
 }
+
+void MENU_COD_SELECT()
+{
+    _setConsole();
+    std::cout << " ___________________________ \n";
+    std::cout << "|-----------GAMES-----------|\n";
+    std::cout << "| [1] CoD4 Modern Warfare   |\n";
+    std::cout << "| [2] CoD  World at War     |\n";
+    std::cout << "| [3] CoD  Modern Warfare 2 |\n";
+    std::cout << "| [5] CoD  Black Ops        |\n";
+    std::cout << "| [6] CoD  Modern Warfare 3 |\n";
+    std::cout << "| [7] CoD  Black Ops 2      |\n";
+    std::cout << "| [8] CoD  Ghosts           |\n";
+    std::cout << "| [9] CoD  Black Ops 3      |\n";
+    std::cout << "| [-] MAIN MENU             |\n";
+    std::cout << "| [END] QUIT                |\n";
+    std::cout << "|---------NightFyre---------| v0.1" << std::endl;
+    std::cout << R"(
+::ATTENTION::
+CoD 5 World at War Is the only functional menu for now
+)" << std::endl;
+}
 #pragma endregion
+
+#pragma region //Call of Duty Series
+void selectCODwaw()
+{
+    _clearConsole();
+    _artCODwaw();
+    Sleep(2050);
+}
+
+void _artCODwaw()
+{
+    _clearConsole();
+    std::cout << R"(
+   ____      _ _          __   ____        _                    
+  / ___|__ _| | |   ___  / _| |  _ \ _   _| |_ _   _ _          
+ | |   / _` | | |  / _ \| |_  | | | | | | | __| | | (_)         
+ | |__| (_| | | | | (_) |  _| | |_| | |_| | |_| |_| |_          
+ _\____\__,_|_|_|  \___/|_| _ |____/ \__,_|\__|\__, (_)         
+ \ \      / /__  _ __| | __| |   __ _| |_  \ \ |___// /_ _ _ __ 
+  \ \ /\ / / _ \| '__| |/ _` |  / _` | __|  \ \ /\ / / _` | '__|
+   \ V  V / (_) | |  | | (_| | | (_| | |_    \ V  V / (_| | |   
+    \_/\_/ \___/|_|  |_|\__,_|  \__,_|\__|    \_/\_/ \__,_|_|   
+                                                                
+)" << std::endl;
+}
+
+void MENU_CODwaw(string& HEALTH, string& AMMO, string& rFIRE, string& FLY, string& LASER, string& PROMOD, string& FPS, string& xCENTx, string& POINTS)
+{
+    _setConsole();
+    std::cout << " ______________________________ \n";
+    std::cout << "|--Call of Duty: World at War--|\n";
+    std::cout << "|[1] INF HEALTH        => [" << HEALTH << "]  |\n";
+    std::cout << "|[2] INF AMMO          => [" << AMMO << "]  |\n";
+    std::cout << "|[3] RAPID FIRE        => [" << rFIRE << "]  |\n";
+    std::cout << "|[4] NO CLIP           => [" << FLY << "]  |\n";
+    std::cout << "|[5] GUN LASER         => [" << LASER << "]  |\n";
+    std::cout << "|[6] PRO MOD           => [" << PROMOD << "]  |\n";
+    std::cout << "|[7] DRAW FPS          => [" << FPS << "]  |\n";
+    std::cout << "|[8] xCENTx MOD        => [" << xCENTx << "]  |\n";
+    std::cout << "|[9] GIVE MAX POINTS   => [" << POINTS << "]  |\n";
+    std::cout << "|[END] QUIT                    |\n";
+    std::cout << "|______________________________|" << std::endl;
+}
+#pragma endregion
+
+
 
 //1
 #pragma region //SOCOM

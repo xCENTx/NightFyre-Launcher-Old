@@ -104,3 +104,10 @@ void _QUITfromSOCOM_2(bool& gameFPS, string& FPS, bool& gamePerfectShot, bool& L
     string& FORCE, bool& gameNVG, string& NVG, bool& bcolor0, bool& bcolor1, bool& bcolor2,
     bool& bcolor3, bool& bcolor4, bool& mainCOLOR, string& COLOR, bool& gameWIDESCREEN,
     string& WIDESCREEN, HANDLE& process);
+
+namespace SOCOM
+{
+    void _return(HANDLE& PROCESS, bool& MENU, bool& HACK1, string& sHACK1, bool& HACK2, string& sHACK2, bool LOOP,
+        bool& HACK3, string& sHACK3, bool& HACK4, bool& HACK5, string& sHACK5,
+        bool& HACK6, string& sHACK6, bool& HACK7, string& sHACK7);
+}

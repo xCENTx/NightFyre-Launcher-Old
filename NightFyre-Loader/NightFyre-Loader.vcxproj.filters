@@ -25,6 +25,9 @@
     <Filter Include="OFFSETS">
       <UniqueIdentifier>{bfa90a60-9253-4860-b198-da3da07b32ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="COD_SERIES">
+      <UniqueIdentifier>{e2ce5ffc-7afb-4325-a8a6-561d0c6c7ae1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -42,6 +45,9 @@
     <ClCompile Include="offsets_socom.cpp">
       <Filter>OFFSETS</Filter>
     </ClCompile>
+    <ClCompile Include="waw.cpp">
+      <Filter>COD_SERIES</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="proc.h">
@@ -58,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="offsets_socom.h">
       <Filter>OFFSETS</Filter>
+    </ClInclude>
+    <ClInclude Include="waw.h">
+      <Filter>COD_SERIES</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

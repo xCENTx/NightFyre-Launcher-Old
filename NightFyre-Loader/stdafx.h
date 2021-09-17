@@ -14,6 +14,7 @@ using namespace std;
 #include "mem.h"
 #include "proc.h"
 #include "menu.h"
+#include "waw.h"
 
 //OFFSETS
 #include "offsets_socom.h"

@@ -27,6 +27,13 @@ void _artFF7();
 void MENU_FF7(string& HP, string& MP, string& GIL);
 #pragma endregion
 
+#pragma region //Call of Duty Series
+void MENU_COD_SELECT();
+void selectCODwaw();
+void _artCODwaw();
+void MENU_CODwaw(string& HEALTH, string& AMMO, string& rFIRE, string& FLY, string& LASER, string& PROMOD, string& FPS, string& xCENTx, string& POINTS);
+#pragma endregion
+
 //MAIN
 void _clearConsole();
 void _setConsole();

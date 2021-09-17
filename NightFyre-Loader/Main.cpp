@@ -2,6 +2,7 @@
 
 //METHODS
 int main2();
+int _codLANDING();
 void _ANCHOR();
 int ePSXe();
 int PCSX2();
@@ -14,6 +15,7 @@ int DeathlyStillness();
 static bool MAINMENU = false;
 static bool menuSHOWN = false;
 static bool bSOCOM_SERIES_MENU = false;
+static bool bCOD_SERIES_MENU = false;
 
 //ePSXe
 static bool bGAME_FF7;
@@ -29,6 +31,10 @@ static bool bGAME_ASSAULT_CUBE = false;
 
 //Binding of Isaac
 static bool bGAME_ISAAC = false;
+
+//Call of Duty
+
+static bool bGAME_WorldAtWar = false;
 
 //FarCry
 static bool bGAME_FARCRY3 = false;
@@ -66,17 +72,20 @@ int main()
             _MAINMENU();
         }
 
-        //FAR CRY 3
+        //Call of Duty Series
         if (GetAsyncKeyState(VK_NUMPAD2) & 1)
         {
-            bGAME_FARCRY3 = true;
-            _ANCHOR();
+            _clearConsole();
+            _codLANDING();
+
+            //This should only execute if we leave main3
+            _MAINMENU();
         }
 
-        //ASSAULT CUBE
+        //Far Cry 3
         if (GetAsyncKeyState(VK_NUMPAD3) & 1)
         {
-            bGAME_ASSAULT_CUBE = true;
+            bGAME_FARCRY3 = true;
             _ANCHOR();
         }
 
@@ -91,6 +100,13 @@ int main()
         if (GetAsyncKeyState(VK_NUMPAD5) & 1)
         {
             bGAME_FF7 = true;
+            _ANCHOR();
+        }
+
+        //Assault Cube
+        if (GetAsyncKeyState(VK_NUMPAD6) & 1)
+        {
+            bGAME_ASSAULT_CUBE = true;
             _ANCHOR();
         }
 
@@ -170,6 +186,42 @@ int main2()
     }
 }
 
+int _codLANDING()
+{
+    MENU_COD_SELECT();
+    bCOD_SERIES_MENU = true;
+    while (MENU_COD_SELECT)
+    {
+        if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+        {
+            bGAME_WorldAtWar = true;
+            _ANCHOR();
+        }
+
+        //Return to Main or Exit
+        if (GetAsyncKeyState(VK_SUBTRACT) & 1)
+        {
+            _clearConsole();
+            bCOD_SERIES_MENU = false;
+            return 0;
+        }
+        if (GetAsyncKeyState(VK_END) & 1)
+        {
+            _clearConsole();
+            bCOD_SERIES_MENU = false;
+            MAINMENU = false;
+            return 0;
+        }
+
+        if (!bCOD_SERIES_MENU)
+        {
+            _clearConsole();
+            std::cout << "If for some reason this window does not close on its own , you may go ahead and close it." << std::endl;
+            return 0;
+        }
+    }
+}
+
 //The goal here is to keep everything tied together
 void _ANCHOR()
 {
@@ -217,6 +269,10 @@ void _ANCHOR()
     {
         select_DEATHLY_STILLNESS();
         DeathlyStillness();
+    }
+    if (bGAME_WorldAtWar)
+    {
+        selectCODwaw();
     }
     _MAINMENU();
 }
@@ -389,6 +445,9 @@ int PCSX2()
     
     //Empty Value for Read and Write Process Memory
     int value;
+    int value2;
+    int value3;
+    int value4;
     int _flagSway;
     int _flagSway2;
     #pragma endregion
@@ -485,6 +544,19 @@ int PCSX2()
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
                 _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                if (bFPS_S1)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _S1framerate1_ADDR, hProcess);
+                }
+                if (bPerfectShot_S1)
+                {
+                    SOCOM1_PERFECTSHOT_OFF(menuSHOWN, sPSHOT, hProcess);
+                }
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
+                _clearConsole();
                 bGAME_SOCOM1 = false;
                 bSOCOM_SERIES_MENU = false;
                 menuSHOWN = false;
@@ -492,6 +564,19 @@ int PCSX2()
             }
             if (GetAsyncKeyState(VK_END) & 1)
             {
+                _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                if (bFPS_S1)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _S1framerate1_ADDR, hProcess);
+                }
+                if (bPerfectShot_S1)
+                {
+                    SOCOM1_PERFECTSHOT_OFF(menuSHOWN, sPSHOT, hProcess);
+                }
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
                 _clearConsole();
                 bGAME_SOCOM1 = false;
                 bSOCOM_SERIES_MENU = false;
@@ -559,7 +644,7 @@ int PCSX2()
                 }
             }
 
-            //BRIGHTNESS
+            //BRIGHTNESS (NEED TO LOOP)
             if (GetAsyncKeyState(VK_NUMPAD4) & 1)
             {
                 bBRIGHTNESS_S2 = !bBRIGHTNESS_S2;
@@ -567,17 +652,6 @@ int PCSX2()
                 {
                     sBRIGHTNESS = "X";
                     menuSHOWN = false;
-                    mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                    mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                    mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                }
-                else
-                {
-                    sBRIGHTNESS = " ";
-                    menuSHOWN = false;
-                    mem::PS2NopEx((BYTE*)_S2mapBrightness1, 4, hProcess);
-                    mem::PS2NopEx((BYTE*)_S2mapBrightness2, 4, hProcess);
-                    mem::PS2NopEx((BYTE*)_S2mapBrightness3, 4, hProcess);
                 }
             }
 
@@ -682,6 +756,13 @@ int PCSX2()
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
                 _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                SOCOM::_return(hProcess, menuSHOWN, bFPS_S2, sFPS, bPerfectShot_S2, sPSHOT, HACK_LOOP, bFOG_S2, sFOG, 
+                    bBRIGHTNESS_S2, bNVG_S2, sNVG, bCCOLOR_S2, sCOLOR, bWideScreen, sWIDESCREEN);
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
+                _clearConsole();
                 bGAME_SOCOM2 = false;
                 bSOCOM_SERIES_MENU = false;
                 menuSHOWN = false;
@@ -691,6 +772,12 @@ int PCSX2()
             if (GetAsyncKeyState(VK_END) & 1)
             {
                 _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                SOCOM::_return(hProcess, menuSHOWN, bFPS_S2, sFPS, bPerfectShot_S2, sPSHOT, HACK_LOOP, bFOG_S2, sFOG, bBRIGHTNESS_S2, bNVG_S2, sNVG, bCCOLOR_S2, sCOLOR, bWideScreen, sWIDESCREEN);
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
+                _clearConsole();
                 bGAME_SOCOM2 = false;
                 bSOCOM_SERIES_MENU = false;
                 menuSHOWN = false;
@@ -698,9 +785,9 @@ int PCSX2()
                 return 0;
             }
 
+            //PROF. LUPIN
             if (bPerfectShot_S2)
             {
-                int value2;
                 int flag = ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &value, sizeof(value), nullptr);
                 int flag2 = ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &value2, sizeof(value2), nullptr);
                 if (value != 0)
@@ -714,7 +801,6 @@ int PCSX2()
                     {
                         mem::PS2NopEx((BYTE*)oRecoil_S2, 4, hProcess); //patch
                         mem::PS2NopEx((BYTE*)oSpread_S2, 4, hProcess);
-
                     }
                     if (value2 != 0)
                     {
@@ -730,6 +816,35 @@ int PCSX2()
             else if (HACK_LOOP)
             {
                 _PS_OFF(HACK_LOOP, bPerfectShot_S2, menuSHOWN, sPSHOT);
+                value = 0;
+                value2 = 0;
+            }
+
+            if (bBRIGHTNESS_S2)
+            {
+                int bFLAG = ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value3, sizeof(value3), nullptr);
+                if (value3 == 0)
+                {
+                    mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                    mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                    mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                }
+            }
+            else if (HACK_LOOP2)
+            {
+                ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value4, sizeof(value4), nullptr);
+                if (value4 != 0)
+                {
+                    mem::PS2NopEx((BYTE*)_S2mapBrightness1, 4, hProcess);
+                    mem::PS2NopEx((BYTE*)_S2mapBrightness2, 4, hProcess);
+                    mem::PS2NopEx((BYTE*)_S2mapBrightness3, 4, hProcess);
+                }
+                value3 = 0;
+                value4 = 0;
+                bBRIGHTNESS_S2 = false;
+                HACK_LOOP2 = false;
+                sBRIGHTNESS = " ";
+                menuSHOWN = false;
             }
         }
 
@@ -782,6 +897,23 @@ int PCSX2()
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
                 _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                if (bFPS_S3)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _S3fps1_ADDR, hProcess);
+                }
+                if (bPerfectShot_S3)
+                {
+                    bPerfectShot_S3 = false;
+                }
+                if (bNoSway_S3)
+                {
+                    bNoSway_S3 = false;
+                }
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
+                _clearConsole();
                 bGAME_SOCOM3 = false;
                 bSOCOM_SERIES_MENU = false;
                 menuSHOWN = false;
@@ -789,6 +921,23 @@ int PCSX2()
             }
             if (GetAsyncKeyState(VK_END) & 1)
             {
+                _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                if (bFPS_S3)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _S3fps1_ADDR, hProcess);
+                }
+                if (bPerfectShot_S3)
+                {
+                    bPerfectShot_S3 = false;
+                }
+                if (bNoSway_S3)
+                {
+                    bNoSway_S3 = false;
+                }
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
                 _clearConsole();
                 bGAME_SOCOM3 = false;
                 bSOCOM_SERIES_MENU = false;
@@ -906,6 +1055,24 @@ int PCSX2()
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
                 _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                if (bFPS_CA)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _CAfps1_ADDR, hProcess);
+                }
+                if (bPerfectShot_CA)
+                {
+                    bPerfectShot_CA = false;
+                    HACK_LOOP = false;
+                }
+                if (bForceStart_CA)
+                {
+                    _FORCESTART_CA_OFF(sFORCE, menuSHOWN, hProcess);
+                }
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
+                _clearConsole();
                 bGAME_SOCOMCA = false;
                 bSOCOM_SERIES_MENU = false;
                 menuSHOWN = false;
@@ -913,6 +1080,24 @@ int PCSX2()
             }
             if (GetAsyncKeyState(VK_END) & 1)
             {
+                _clearConsole();
+                std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
+                Sleep(1050);
+                if (bFPS_CA)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _CAfps1_ADDR, hProcess);
+                }
+                if (bPerfectShot_CA)
+                {
+                    bPerfectShot_CA = false;
+                    HACK_LOOP = false;
+                }
+                if (bForceStart_CA)
+                {
+                    _FORCESTART_CA_OFF(sFORCE, menuSHOWN, hProcess);
+                }
+                std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
+                Sleep(1050);
                 _clearConsole();
                 bGAME_SOCOMCA = false;
                 bSOCOM_SERIES_MENU = false;
@@ -1359,6 +1544,140 @@ int TheBindingofIsaac()
             return 0;
         }
     }
+}
+
+int WorldAtWar()
+{
+    SetConsoleTitle(L"Call of Duty: World at War | CONSOLE");
+    HANDLE hProc = 0;
+    uintptr_t moduleBase = 0;
+    uintptr_t pHEALTH = 0, pAMMO = 0, prFIRE = 0, pNOCLIP = 0, pLASER = 0, pFPS = 0, pFOG = 0, pFOV = 0, pSPRINT = 0, pPOINTS = 0;
+    
+    //Hack Bools
+    bool healthhack_enabled = false;
+    bool ammohack_enabled = false;
+    bool rapidfire_enabled = false;
+    bool NoClip_enabled = false;
+    bool Laser_Enabled = false;
+    bool DrawFPS_Enabled = false;
+    bool ProMod_Enabled = false;
+    bool CentsMod_Enabled = false;
+    bool GiveMoney_Enabled = false;
+
+    //Variable Strings for menu
+    string sHEALTH = " ", sAMMO = " ", srFIRE = " ", sFLY = " ", sLASER = " ", sPROMOD = " ", sFPS = " ", sxCENTx = " ", sPOINTS = " ";
+
+    //Get Proc ID
+    DWORD procID = GetProcId(L"cod5sp.exe");
+    std::cout << "Searching for process . . ." << std::endl;
+    Sleep(500);
+
+    if (procID)
+    {
+        std::cout << "Process Found!" << std::endl;
+        Sleep(700);
+        hProc = OpenProcess(PROCESS_ALL_ACCESS, NULL, procID);
+
+        moduleBase = GetModuleBaseAddress(procID, L"cod5sp.exe");
+
+        std::cout << "Obtained handle to process" << std::endl;
+        Sleep(1400);
+        pHEALTH = 0x004F31F4;
+        pAMMO = 0x0041E619;
+        prFIRE = 0x00420BCB;
+        pNOCLIP = 0x018EF2A4;
+        pLASER = 0x021C6F94;
+        pFPS = 0x021B51E0;
+        pFOG = 0x21D0E10;
+        pFOV = 0x021C4F98;
+        pSPRINT = 0x21CBBC4;
+        pPOINTS = 0x018EF124;
+
+        std::cout << "Established base address and resolved pointer chains" << std::endl;
+        Sleep(750);
+        std::cout << "Loading Menu . . ." << std::endl;
+        Sleep(500);
+    }
+    else
+    {
+        _clearConsole();
+        std::cout << "Process Not Found - Returning to main menu" << std::endl;
+        bGAME_WorldAtWar = false;
+        Sleep(2050);
+        return 0;
+    }
+
+    DWORD dwExit = 0;
+    while (GetExitCodeProcess(hProc, &dwExit) && dwExit == STILL_ACTIVE)
+    {
+        if (!menuSHOWN)
+        {
+            menuSHOWN = true;
+            _clearConsole();
+            MENU_CODwaw(sHEALTH, sAMMO, srFIRE, sFLY, sLASER, sPROMOD, sFPS, sxCENTx, sPOINTS);
+        }
+
+        //INFINITE HEALTH
+        if (GetAsyncKeyState(VK_NUMPAD1) & 1)
+        {
+            waw::HEALTH(healthhack_enabled, pHEALTH, hProc, sHEALTH, menuSHOWN);
+        }
+
+        //UNLIMITED AMMO
+        if (GetAsyncKeyState(VK_NUMPAD2))
+        {
+            waw::AMMO(ammohack_enabled, pAMMO, hProc, sAMMO, menuSHOWN);
+        }
+
+        //RAPID FIRE
+        if (GetAsyncKeyState(VK_NUMPAD3))
+        {
+            waw::RAPIDFIRE(rapidfire_enabled, prFIRE, hProc, srFIRE, menuSHOWN);
+        }
+
+        //NO CLIP
+        if (GetAsyncKeyState(VK_NUMPAD4))
+        {
+            waw::BOOL(NoClip_enabled, pNOCLIP, hProc, sFLY, menuSHOWN);
+        }
+
+        //LASER
+        if (GetAsyncKeyState(VK_NUMPAD5))
+        {
+            waw::BOOL(Laser_Enabled, pLASER, hProc, sLASER, menuSHOWN);
+        }
+
+        //PRO MOD
+        if (GetAsyncKeyState(VK_NUMPAD6))
+        {
+            waw::PROMOD(ProMod_Enabled, pFOG, pFOV, pSPRINT, hProc, sPROMOD, menuSHOWN);
+        }
+
+        //DRAW FPS
+        if (GetAsyncKeyState(VK_NUMPAD7))
+        {
+            waw::FPS(DrawFPS_Enabled, pFPS, hProc, sFPS, menuSHOWN);
+        }
+
+        //xCENTx MOD
+        if (GetAsyncKeyState(VK_F8))
+        {
+            //patch::CENTHACK(CentsMod_Enabled, pHEALTH, pAMMO, prFIRE, pLASER, pFOG, pFOV, pSPRINT, pFPS, hProc, sxCENTx, menuSHOWN);
+        }
+
+        //GIVE POINTS
+        if (GetAsyncKeyState(VK_NUMPAD9))
+        {
+            waw::POINTS(pPOINTS, hProc, sPOINTS, menuSHOWN);
+        }
+
+        Sleep(100);
+    }
+    _clearConsole();
+    std::cout << "Process Not Found - Returning to main menu" << std::endl;
+    bGAME_WorldAtWar = false;
+    Sleep(2050);
+    return 0;
 }
 
 //x64 (damnit)

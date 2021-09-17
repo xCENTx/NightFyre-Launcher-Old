@@ -397,3 +397,57 @@ void _QUITfromSOCOM_2(bool& gameFPS, string& FPS, bool& gamePerfectShot, bool& L
     _clearConsole();
     std::cout << "TERMINATING SESSION, THANK YOU FOR USING" << std::endl;
 }
+
+
+///I SERIOUSLY NEED TO GO THROUGH ALL OF THESE AS I DO NOT KNOW WHAT IS AND ISNT BEING USED
+// EVERYTHING BELOW IS THE LATEST AS OF VIP BUILD 0.0.5
+// RETURN TO MAIN AND EXIT RESTORE DEFAULTS
+
+
+void SOCOM::_return(HANDLE& PROCESS, bool& MENU, bool& HACK1, string& sHACK1, bool& HACK2, string& sHACK2, bool LOOP,
+    bool& HACK3, string& sHACK3, bool& HACK4, bool& HACK5, string& sHACK5,
+    bool& HACK6, string& sHACK6, bool& HACK7, string& sHACK7)
+{
+    if (HACK1)
+    {
+        _FPS_OFF(sHACK1, MENU, _S2fps1_ADDR, PROCESS);
+    }
+    if (HACK2)
+    {
+        _PS_OFF(LOOP, HACK2, MENU, sHACK2);
+    }
+    if (HACK3)
+    {
+        sHACK3 = " ";
+        MENU = false;
+        mem::PatchEx((BYTE*)_S2fog_ADDR, (BYTE*)"\x01\x00\x00\x00", 4, PROCESS);
+    }
+    if (HACK4)
+    {
+        HACK4 = false;
+    }
+    if (HACK5)
+    {
+        sHACK5 = " ";
+        MENU = false;
+        mem::PatchEx((BYTE*)_S2nvgFIX, (BYTE*)"\xD0\x5D\x06\x0C", 4, PROCESS);
+    }
+    if (sHACK6 != "0")
+    {
+        int a;
+        ReadProcessMemory(PROCESS, (BYTE*)_S2crosshairR, &a, sizeof(a), nullptr);
+        if (a != 1128792064)
+        {
+            mem::PatchEx((BYTE*)_S2crosshairR, (BYTE*)"\x00\x00\x48\x43", 4, PROCESS);
+            mem::PatchEx((BYTE*)_S2crosshairG, (BYTE*)"\x00\x00\x48\x43", 4, PROCESS);
+            mem::PatchEx((BYTE*)_S2crosshairB, (BYTE*)"\x00\x00\xC0\x41", 4, PROCESS);
+            sHACK6 = "0";
+            HACK6 = false;
+        }
+    }
+    if (HACK7)
+    {
+        _WIDESCREEN_S2_OFF(sHACK7, MENU, PROCESS);
+        HACK7 = false;
+    }
+}
