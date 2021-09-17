@@ -10,6 +10,7 @@ int FarCry3();
 int AssaultCube();
 int TheBindingofIsaac();
 int DeathlyStillness();
+int WorldAtWar();
 
 //MAIN
 static bool MAINMENU = false;
@@ -273,6 +274,7 @@ void _ANCHOR()
     if (bGAME_WorldAtWar)
     {
         selectCODwaw();
+        WorldAtWar();
     }
     _MAINMENU();
 }
@@ -1272,6 +1274,17 @@ int FarCry3()
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
                 _clearConsole();
+                //RESTORE DEFAULTS
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (bAMMO)
+                {
+                    HACK_LOOP = false;
+                    bAMMO = false;
+                    sAMMO = " ";
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
+                _clearConsole();
                 bGAME_FARCRY3 = false;
                 menuSHOWN = false;
                 return 0;
@@ -1279,6 +1292,16 @@ int FarCry3()
             if (GetAsyncKeyState(VK_END) & 1)
             {
                 _clearConsole();
+                //RESTORE DEFAULTS
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (bAMMO)
+                {
+                    HACK_LOOP = false;
+                    bAMMO = false;
+                    sAMMO = " ";
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
                 bGAME_FARCRY3 = false;
                 menuSHOWN = false;
                 MAINMENU = false;
@@ -1450,12 +1473,58 @@ int AssaultCube()
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
                 _clearConsole();
+                //RESTORE DEFAULTS
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (bHEALTH)
+                {
+                    HACK_LOOP = false;
+                    bHEALTH = false;
+                    sHEALTH = " ";
+                }
+                if (bAMMO)
+                {
+                    HACK_LOOP2 = false;
+                    bAMMO = false;
+                    sAMMO = " ";
+                }
+                if (bRECOIL)
+                {
+                    mem::PatchEx((BYTE*)recoilBase, (BYTE*)"\x55\x8b\xEC", 3, hProcess);
+                    bRECOIL = false;
+                    sRECOIL = " ";
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
+                _clearConsole();
                 bGAME_ASSAULT_CUBE = false;
                 menuSHOWN = false;
                 return 0;
             }
             if (GetAsyncKeyState(VK_END) & 1)
             {
+                _clearConsole();
+                //RESTORE DEFAULTS
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (bHEALTH)
+                {
+                    HACK_LOOP = false;
+                    bHEALTH = false;
+                    sHEALTH = " ";
+                }
+                if (bAMMO)
+                {
+                    HACK_LOOP2 = false;
+                    bAMMO = false;
+                    sAMMO = " ";
+                }
+                if (bRECOIL)
+                {
+                    mem::PatchEx((BYTE*)recoilBase, (BYTE*)"\x55\x8b\xEC", 3, hProcess);
+                    bRECOIL = false;
+                    sRECOIL = " ";
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
                 _clearConsole();
                 bGAME_ASSAULT_CUBE = false;
                 menuSHOWN = false;
@@ -1546,10 +1615,16 @@ int TheBindingofIsaac()
     }
 }
 
+//Call of Duty Series
+int Cod4()
+{
+
+}
+
 int WorldAtWar()
 {
     SetConsoleTitle(L"Call of Duty: World at War | CONSOLE");
-    HANDLE hProc = 0;
+    HANDLE hProcess = 0;
     uintptr_t moduleBase = 0;
     uintptr_t pHEALTH = 0, pAMMO = 0, prFIRE = 0, pNOCLIP = 0, pLASER = 0, pFPS = 0, pFOG = 0, pFOV = 0, pSPRINT = 0, pPOINTS = 0;
     
@@ -1568,17 +1643,17 @@ int WorldAtWar()
     string sHEALTH = " ", sAMMO = " ", srFIRE = " ", sFLY = " ", sLASER = " ", sPROMOD = " ", sFPS = " ", sxCENTx = " ", sPOINTS = " ";
 
     //Get Proc ID
-    DWORD procID = GetProcId(L"cod5sp.exe");
+    DWORD procId = GetProcId(L"cod5sp.exe");
     std::cout << "Searching for process . . ." << std::endl;
     Sleep(500);
 
-    if (procID)
+    if (procId)
     {
         std::cout << "Process Found!" << std::endl;
         Sleep(700);
-        hProc = OpenProcess(PROCESS_ALL_ACCESS, NULL, procID);
+        hProcess = OpenProcess(PROCESS_ALL_ACCESS, NULL, procId);
 
-        moduleBase = GetModuleBaseAddress(procID, L"cod5sp.exe");
+        moduleBase = GetModuleBaseAddress(procId, L"cod5sp.exe");
 
         std::cout << "Obtained handle to process" << std::endl;
         Sleep(1400);
@@ -1608,69 +1683,173 @@ int WorldAtWar()
     }
 
     DWORD dwExit = 0;
-    while (GetExitCodeProcess(hProc, &dwExit) && dwExit == STILL_ACTIVE)
+    while (GetExitCodeProcess(hProcess, &dwExit) && dwExit == STILL_ACTIVE)
     {
-        if (!menuSHOWN)
+        if (bGAME_WorldAtWar)
         {
-            menuSHOWN = true;
-            _clearConsole();
-            MENU_CODwaw(sHEALTH, sAMMO, srFIRE, sFLY, sLASER, sPROMOD, sFPS, sxCENTx, sPOINTS);
-        }
+            if (!menuSHOWN)
+            {
+                menuSHOWN = true;
+                _clearConsole();
+                MENU_CODwaw(sHEALTH, sAMMO, srFIRE, sFLY, sLASER, sPROMOD, sFPS, sxCENTx, sPOINTS);
+            }
 
-        //INFINITE HEALTH
-        if (GetAsyncKeyState(VK_NUMPAD1) & 1)
-        {
-            waw::HEALTH(healthhack_enabled, pHEALTH, hProc, sHEALTH, menuSHOWN);
-        }
+            //INFINITE HEALTH
+            if (GetAsyncKeyState(VK_NUMPAD1) & 1)
+            {
+                waw::HEALTH(healthhack_enabled, pHEALTH, hProcess, sHEALTH, menuSHOWN);
+            }
 
-        //UNLIMITED AMMO
-        if (GetAsyncKeyState(VK_NUMPAD2))
-        {
-            waw::AMMO(ammohack_enabled, pAMMO, hProc, sAMMO, menuSHOWN);
-        }
+            //UNLIMITED AMMO
+            if (GetAsyncKeyState(VK_NUMPAD2))
+            {
+                waw::AMMO(ammohack_enabled, pAMMO, hProcess, sAMMO, menuSHOWN);
+            }
 
-        //RAPID FIRE
-        if (GetAsyncKeyState(VK_NUMPAD3))
-        {
-            waw::RAPIDFIRE(rapidfire_enabled, prFIRE, hProc, srFIRE, menuSHOWN);
-        }
+            //RAPID FIRE
+            if (GetAsyncKeyState(VK_NUMPAD3))
+            {
+                waw::RAPIDFIRE(rapidfire_enabled, prFIRE, hProcess, srFIRE, menuSHOWN);
+            }
 
-        //NO CLIP
-        if (GetAsyncKeyState(VK_NUMPAD4))
-        {
-            waw::BOOL(NoClip_enabled, pNOCLIP, hProc, sFLY, menuSHOWN);
-        }
+            //NO CLIP
+            if (GetAsyncKeyState(VK_NUMPAD4))
+            {
+                waw::BOOL(NoClip_enabled, pNOCLIP, hProcess, sFLY, menuSHOWN);
+            }
 
-        //LASER
-        if (GetAsyncKeyState(VK_NUMPAD5))
-        {
-            waw::BOOL(Laser_Enabled, pLASER, hProc, sLASER, menuSHOWN);
-        }
+            //LASER
+            if (GetAsyncKeyState(VK_NUMPAD5))
+            {
+                waw::BOOL(Laser_Enabled, pLASER, hProcess, sLASER, menuSHOWN);
+            }
 
-        //PRO MOD
-        if (GetAsyncKeyState(VK_NUMPAD6))
-        {
-            waw::PROMOD(ProMod_Enabled, pFOG, pFOV, pSPRINT, hProc, sPROMOD, menuSHOWN);
-        }
+            //PRO MOD
+            if (GetAsyncKeyState(VK_NUMPAD6))
+            {
+                waw::PROMOD(ProMod_Enabled, pFOG, pFOV, pSPRINT, hProcess, sPROMOD, menuSHOWN);
+            }
 
-        //DRAW FPS
-        if (GetAsyncKeyState(VK_NUMPAD7))
-        {
-            waw::FPS(DrawFPS_Enabled, pFPS, hProc, sFPS, menuSHOWN);
-        }
+            //DRAW FPS
+            if (GetAsyncKeyState(VK_NUMPAD7))
+            {
+                waw::FPS(DrawFPS_Enabled, pFPS, hProcess, sFPS, menuSHOWN);
+            }
 
-        //xCENTx MOD
-        if (GetAsyncKeyState(VK_F8))
-        {
-            //patch::CENTHACK(CentsMod_Enabled, pHEALTH, pAMMO, prFIRE, pLASER, pFOG, pFOV, pSPRINT, pFPS, hProc, sxCENTx, menuSHOWN);
-        }
+            //xCENTx MOD
+            if (GetAsyncKeyState(VK_F8))
+            {
+                //patch::CENTHACK(CentsMod_Enabled, pHEALTH, pAMMO, prFIRE, pLASER, pFOG, pFOV, pSPRINT, pFPS, hProc, sxCENTx, menuSHOWN);
+            }
 
-        //GIVE POINTS
-        if (GetAsyncKeyState(VK_NUMPAD9))
-        {
-            waw::POINTS(pPOINTS, hProc, sPOINTS, menuSHOWN);
-        }
+            //GIVE POINTS
+            if (GetAsyncKeyState(VK_NUMPAD9))
+            {
+                waw::POINTS(pPOINTS, hProcess, sPOINTS, menuSHOWN);
+            }
 
+            //RETURN and EXIT
+            if (GetAsyncKeyState(VK_SUBTRACT) & 1)
+            {
+                _clearConsole();
+                
+                //RESTORE DEFAULTS
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (healthhack_enabled)
+                {
+                    mem::PatchEx((BYTE*)pHEALTH, (BYTE*)"\x89\x96\xC8\x01\x00\x00", 6, hProcess);
+                    sHEALTH = " ";
+                }
+                if (ammohack_enabled)
+                {
+                    mem::PatchEx((BYTE*)pAMMO, (BYTE*)"\x89\x84\x8F\xFC\x05\x00\x00", 7, hProcess);
+                    sAMMO = " ";
+                }
+                if (rapidfire_enabled)
+                {
+                    mem::PatchEx((BYTE*)prFIRE, (BYTE*)"\xE8\x10\xFA\xFF\xFF", 5, hProcess);
+                    srFIRE = " ";
+                }
+                if (NoClip_enabled)
+                {
+                    mem::PatchEx((BYTE*)pNOCLIP, (BYTE*)"\x00", 1, hProcess);
+                    sFLY = " ";
+                }
+                if (Laser_Enabled)
+                {
+                    mem::PatchEx((BYTE*)pLASER, (BYTE*)"\x00", 1, hProcess);
+                    sLASER = " ";
+                }
+                if (ProMod_Enabled)
+                {
+                    mem::PatchEx((BYTE*)pFOG, (BYTE*)"\x00", 1, hProcess);
+                    mem::PatchEx((BYTE*)pSPRINT, (BYTE*)"\x00\x00\x82\x42", 4, hProcess);
+                    mem::PatchEx((BYTE*)pFOV, (BYTE*)"\x00", 1, hProcess);
+                }
+                if (DrawFPS_Enabled)
+                {
+                    mem::PatchEx((BYTE*)pFPS, (BYTE*)"\x00", 1, hProcess);
+                    sFPS = " ";
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
+                _clearConsole();
+                Sleep(2050);
+                bGAME_WorldAtWar = false;
+                menuSHOWN = false;
+                return 0;
+            }
+            if (GetAsyncKeyState(VK_END) & 1)
+            {
+                _clearConsole();
+
+                //RESTORE DEFAULTS
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (healthhack_enabled)
+                {
+                    mem::PatchEx((BYTE*)pHEALTH, (BYTE*)"\x89\x96\xC8\x01\x00\x00", 6, hProcess);
+                    sHEALTH = " ";
+                }
+                if (ammohack_enabled)
+                {
+                    mem::PatchEx((BYTE*)pAMMO, (BYTE*)"\x89\x84\x8F\xFC\x05\x00\x00", 7, hProcess);
+                    sAMMO = " ";
+                }
+                if (rapidfire_enabled)
+                {
+                    mem::PatchEx((BYTE*)prFIRE, (BYTE*)"\xE8\x10\xFA\xFF\xFF", 5, hProcess);
+                    srFIRE = " ";
+                }
+                if (NoClip_enabled)
+                {
+                    mem::PatchEx((BYTE*)pNOCLIP, (BYTE*)"\x00", 1, hProcess);
+                    sFLY = " ";
+                }
+                if (Laser_Enabled)
+                {
+                    mem::PatchEx((BYTE*)pLASER, (BYTE*)"\x00", 1, hProcess);
+                    sLASER = " ";
+                }
+                if (ProMod_Enabled)
+                {
+                    mem::PatchEx((BYTE*)pFOG, (BYTE*)"\x00", 1, hProcess);
+                    mem::PatchEx((BYTE*)pSPRINT, (BYTE*)"\x00\x00\x82\x42", 4, hProcess);
+                    mem::PatchEx((BYTE*)pFOV, (BYTE*)"\x00", 1, hProcess);
+                }
+                if (DrawFPS_Enabled)
+                {
+                    mem::PatchEx((BYTE*)pFPS, (BYTE*)"\x00", 1, hProcess);
+                    sFPS = " ";
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
+                _clearConsole();
+                bGAME_WorldAtWar = false;
+                menuSHOWN = false;
+                MAINMENU = false;
+                return 0;
+            }
+        }
         Sleep(100);
     }
     _clearConsole();
@@ -1678,6 +1857,11 @@ int WorldAtWar()
     bGAME_WorldAtWar = false;
     Sleep(2050);
     return 0;
+}
+
+int MW2()
+{
+
 }
 
 //x64 (damnit)
