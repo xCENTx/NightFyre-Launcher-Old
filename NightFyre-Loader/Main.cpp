@@ -1,9 +1,10 @@
 #include "stdafx.h"
 
-//METHODS
-int main2();
-int _codLANDING();
 void _ANCHOR();
+int _socomLANDING();
+int _codLANDING();
+
+//GAME MENUS
 int ePSXe();
 int PCSX2();
 int FarCry3();
@@ -11,7 +12,9 @@ int AssaultCube();
 int TheBindingofIsaac();
 int DeathlyStillness();
 int WorldAtWar();
+//-----------------------
 
+#pragma region  //VARIABLES
 //MAIN
 static bool MAINMENU = false;
 static bool menuSHOWN = false;
@@ -51,7 +54,9 @@ static bool bGAME_MGSTPP = false;
 //Deathly Stillness
 static bool bGAME_Deathly_Stillness = false;
 
-/// MAIN MENU
+#pragma endregion
+
+///MAIN MENU
 int main()
 {
     //We need to display a text with selections
@@ -66,7 +71,7 @@ int main()
         if (GetAsyncKeyState(VK_NUMPAD1) & 1)
         {
             _clearConsole();
-            main2();
+            _socomLANDING();
 
             //Hopefully* anything after this is only executed after main2 has returned 0. 
             //Therefore we will want to repopulate main, which we can do simply by running through it again
@@ -111,7 +116,7 @@ int main()
             _ANCHOR();
         }
 
-        //Deathly Stilness
+        //Deathly Stilness x64 (TEST)
         if (GetAsyncKeyState(VK_NUMPAD9) & 1)
         {
             bGAME_Deathly_Stillness = true;
@@ -135,8 +140,8 @@ int main()
 
 }
 
-//SOCOM SERIES ALT MENU
-int main2()
+///ALT MENUS
+int _socomLANDING()
 {
     MENU_SOCOM_SELECT();
     bSOCOM_SERIES_MENU = true;
@@ -186,7 +191,6 @@ int main2()
         }
     }
 }
-
 int _codLANDING()
 {
     MENU_COD_SELECT();
@@ -223,7 +227,7 @@ int _codLANDING()
     }
 }
 
-//The goal here is to keep everything tied together
+///VERY IMPORTANT
 void _ANCHOR()
 {
     if (bGAME_SOCOM1)
@@ -279,7 +283,7 @@ void _ANCHOR()
     _MAINMENU();
 }
 
-/// GAME MENUS
+///GAME MENUS
 int ePSXe()
 {
     SetConsoleTitle(L"ePSXe v2.0.5 - Final Fantasy 7 | CONSOLE");
@@ -588,6 +592,11 @@ int PCSX2()
             }
         }
 
+        //Patch 0.0.51
+        //Bunch of checks if user is in game
+        //Anti cheat seems to be booting players who activate while not in match
+        //code scanner does not function while in game 
+        //need to introduce a single loop for all hacks which will keep anything toggled so the user does not have to manually re activate on each round
         if (bGAME_SOCOM2)
         {
             if (!menuSHOWN)
@@ -607,7 +616,17 @@ int PCSX2()
 
                 if (bFPS_S2)
                 {
-                    _FPS_ON(sFPS, menuSHOWN, _S2fps1_ADDR, hProcess);
+                    int inGAME;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                    if (inGAME != 0)
+                    {
+                        _FPS_ON(sFPS, menuSHOWN, _S2fps1_ADDR, hProcess);
+                    }
+                    else
+                    {
+                        std::cout << "Please wait until your are in game to use this patch" << std::endl;
+                        Sleep(2000);
+                    }
                 }
                 else
                 {
@@ -634,9 +653,19 @@ int PCSX2()
 
                 if (bFOG_S2)
                 {
-                    sFOG = "X";
-                    menuSHOWN = false;
-                    mem::PS2NopEx((BYTE*)_S2fog_ADDR, 4, hProcess);
+                    int inGAME;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                    if (inGAME != 0)
+                    {
+                        sFOG = "X";
+                        menuSHOWN = false;
+                        mem::PS2NopEx((BYTE*)_S2fog_ADDR, 4, hProcess);
+                    }
+                    else
+                    {
+                        std::cout << "Please wait until your are in game to use this patch" << std::endl;
+                        Sleep(2000);
+                    }
                 }
                 else
                 {
@@ -650,10 +679,21 @@ int PCSX2()
             if (GetAsyncKeyState(VK_NUMPAD4) & 1)
             {
                 bBRIGHTNESS_S2 = !bBRIGHTNESS_S2;
-                if (bBRIGHTNESS_S2)
+                
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME != 0)
                 {
-                    sBRIGHTNESS = "X";
-                    menuSHOWN = false;
+                    if (bBRIGHTNESS_S2)
+                    {
+                        sBRIGHTNESS = "X";
+                        menuSHOWN = false;
+                    }
+                }
+                else
+                {
+                    std::cout << "Please wait until your are in game to use this patch" << std::endl;
+                    Sleep(2000);
                 }
             }
 
@@ -680,49 +720,60 @@ int PCSX2()
             {
                 bCCOLOR_S2 = !bCCOLOR_S2;
 
-                if (bCCOLOR_S2)
+                //IN GAME CHECK
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME != 0)
                 {
-                    //TEAL
-                    if (sCOLOR == "0" && color0)
+                    if (bCCOLOR_S2)
                     {
-                        _COLORCROSSHAIR1_S2(sCOLOR, color0, color1, menuSHOWN, bCCOLOR_S2, hProcess);
+                        //TEAL
+                        if (sCOLOR == "0" && color0)
+                        {
+                            _COLORCROSSHAIR1_S2(sCOLOR, color0, color1, menuSHOWN, bCCOLOR_S2, hProcess);
+                        }
+                    }
+
+                    if (bCCOLOR_S2 && color1)
+                    {
+                        //MAGENTA
+                        if (sCOLOR == "1")
+                        {
+                            _COLORCROSSHAIR2_S2(sCOLOR, color1, color2, menuSHOWN, bCCOLOR_S2, hProcess);
+                        }
+                    }
+
+                    if (bCCOLOR_S2 && color2)
+                    {
+                        //BLUE
+                        if (sCOLOR == "2")
+                        {
+                            _COLORCROSSHAIR3_S2(sCOLOR, color2, color3, menuSHOWN, bCCOLOR_S2, hProcess);
+                        }
+                    }
+
+                    if (bCCOLOR_S2 && color3)
+                    {
+                        //WHITE
+                        if (sCOLOR == "3")
+                        {
+                            _COLORCROSSHAIR4_S2(sCOLOR, color3, color4, menuSHOWN, bCCOLOR_S2, hProcess);
+                        }
+                    }
+
+                    if (bCCOLOR_S2 && color4)
+                    {
+                        //DEFAULT
+                        if (sCOLOR == "4")
+                        {
+                            _COLORCROSSHAIR5_S2(sCOLOR, color4, color0, menuSHOWN, bCCOLOR_S2, hProcess);
+                        }
                     }
                 }
-
-                if (bCCOLOR_S2 && color1)
+                else
                 {
-                    //MAGENTA
-                    if (sCOLOR == "1")
-                    {
-                        _COLORCROSSHAIR2_S2(sCOLOR, color1, color2, menuSHOWN, bCCOLOR_S2, hProcess);
-                    }
-                }
-
-                if (bCCOLOR_S2 && color2)
-                {
-                    //BLUE
-                    if (sCOLOR == "2")
-                    {
-                        _COLORCROSSHAIR3_S2(sCOLOR, color2, color3, menuSHOWN, bCCOLOR_S2, hProcess);
-                    }
-                }
-
-                if (bCCOLOR_S2 && color3)
-                {
-                    //WHITE
-                    if (sCOLOR == "3")
-                    {
-                        _COLORCROSSHAIR4_S2(sCOLOR, color3, color4, menuSHOWN, bCCOLOR_S2, hProcess);
-                    }
-                }
-
-                if (bCCOLOR_S2 && color4)
-                {
-                    //DEFAULT
-                    if (sCOLOR == "4")
-                    {
-                        _COLORCROSSHAIR5_S2(sCOLOR, color4, color0, menuSHOWN, bCCOLOR_S2, hProcess);
-                    }
+                    std::cout << "Please wait until your are in game to use this patch" << std::endl;
+                    Sleep(2000);
                 }
             }
 
@@ -788,6 +839,12 @@ int PCSX2()
             }
 
             //PROF. LUPIN
+            //THE FOLLOWING PATCHES EXECUTE EVERY 10 SECONDS
+            //FURTHERMORE, CHECKS IF PLAYER IS IN GAME ARE MADE
+            //IF PLAYER IS NOT IN GAME , DEFAULTS ARE RESTORED IF NOT ALREADY
+            //AS WELL AS, METHOD WILL WAIT FOR PLAYER TO BE IN GAME AGAIN.
+            //THEREFORE , THE PATCH IS STILL "TOGGLED" REQUIRING NO USER INPUT
+            //AS SOON AS A MATCH RESTARTS , THE PATCH WILL BE APPLIED AGAIN
             if (bPerfectShot_S2)
             {
                 int flag = ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &value, sizeof(value), nullptr);
@@ -821,15 +878,28 @@ int PCSX2()
                 value = 0;
                 value2 = 0;
             }
-
+            
             if (bBRIGHTNESS_S2)
             {
-                int bFLAG = ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value3, sizeof(value3), nullptr);
-                if (value3 == 0)
+                //Patch 0.0.51
+                //Check if player is in game
+                //If player is not in game , we do not want to change anything
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME != 0)
                 {
-                    mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                    mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                    mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                    int bFLAG = ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value3, sizeof(value3), nullptr);
+                    if (value3 == 0)
+                    {
+                        mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                    }
+                }
+                else
+                {
+                    bBRIGHTNESS_S2 = false;
+
                 }
             }
             else if (HACK_LOOP2)
@@ -847,6 +917,52 @@ int PCSX2()
                 HACK_LOOP2 = false;
                 sBRIGHTNESS = " ";
                 menuSHOWN = false;
+            }
+
+            //THE FOLLOWING ARE CHECKS IF THE GAME HAS ENDED
+            //AS SOON AS THE GAME ENDS, PATCHES WILL ALL RETURN DEFAULT VALUE
+            //THIS SHOULD HAPPEN BEFORE RETURNING TO LOBBY
+            //THIS WILL ALSO HAPPEN IN BETWEEN ROUNDS , USER WILL NEED TO TOGGLE AGAIN
+            if (bFOG_S2)
+            {
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME == 0)
+                {
+                    sFOG = " ";
+                    menuSHOWN = false;
+                    mem::PatchEx((BYTE*)_S2fog_ADDR, (BYTE*)"\x01\x00\x00\x00", 4, hProcess);
+                }
+            }
+
+            if (bCCOLOR_S2)
+            {
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME == 0)
+                {
+                    int a;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2crosshairR, &a, sizeof(a), nullptr);
+                    if (a != 1128792064)
+                    {
+                        mem::PatchEx((BYTE*)_S2crosshairR, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2crosshairG, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2crosshairB, (BYTE*)"\x00\x00\xC0\x41", 4, hProcess);
+                        sCOLOR = "0";
+                        bCCOLOR_S2 = false;
+                        menuSHOWN = false;
+                    }
+                }
+            }
+
+            if (bFPS_S2)
+            {
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME == 0)
+                {
+                    _FPS_OFF(sFPS, menuSHOWN, _S2fps1_ADDR, hProcess);
+                }
             }
         }
 
@@ -1615,7 +1731,7 @@ int TheBindingofIsaac()
     }
 }
 
-//Call of Duty Series
+#pragma region //Call of Duty Series
 int Cod4()
 {
 
@@ -1863,6 +1979,7 @@ int MW2()
 {
 
 }
+#pragma endregion
 
 //x64 (damnit)
 int RPCS3()
