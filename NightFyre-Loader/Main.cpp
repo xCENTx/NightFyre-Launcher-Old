@@ -284,23 +284,31 @@ void _ANCHOR()
 }
 
 ///GAME MENUS
+
+///Patch 0.0.51
+//Intereresting methods to note
+//- HACK LOOP
 int ePSXe()
 {
     SetConsoleTitle(L"ePSXe v2.0.5 - Final Fantasy 7 | CONSOLE");
     #pragma region //Establish Variables
     HANDLE hProcess = 0;
     uintptr_t moduleBase = 0;
-    uintptr_t currentHP1 = 0, maxHP1 = 0, currentMP1 = 0;
-    uintptr_t currentHP2 = 0, maxHP2 = 0, currentMP2 = 0;
-    uintptr_t currentHP3 = 0, maxHP3 = 0, currentMP3 = 0;
+    uintptr_t currentHP1_ADDR = 0, maxHP1_ADDR = 0, currentMP1_ADDR = 0;
+    uintptr_t currentHP2_ADDR = 0, maxHP2_ADDR = 0, currentMP2_ADDR = 0;
+    uintptr_t currentHP3_ADDR = 0, maxHP3_ADDR = 0, currentMP3_ADDR = 0;
+    uintptr_t GIL_ADDRESS = 0;
     bool bHP = false, bMP = false, bGIL = false;
     string sHP = " ", sMP = " ", sGIL = " ";
     bool HACK_LOOP = false;
 
     //Empty Variables
-    int cHP1, mHP1, cMP1, mMP1;
-    int cHP2, mHP2, cMP2, mMP2;
-    int cHP3, mHP3, cMP3, mMP3;
+    int cHP1, mHP1;
+    byte cMP1, mMP1;
+    int cHP2, mHP2;
+    byte cMP2, mMP2;
+    int cHP3, mHP3;
+    byte cMP3, mMP3;
     #pragma endregion
 
     std::cout << "Searching for ePSXe . . .\n";
@@ -330,15 +338,17 @@ int ePSXe()
         std::cout << "Loading Menu . . ." << std::endl;
         Sleep(1550);
 
+        GIL_ADDRESS = moduleBase + 0xB1F280;
+
         //Character 1 Pointers
-        currentHP1 = moduleBase + 0xB7A42C;
-        maxHP1 = moduleBase + 0xB7A430;
-        currentMP1 = moduleBase + 0xB7A428;
+        currentHP1_ADDR = moduleBase + 0xB7A42C;
+        maxHP1_ADDR = moduleBase + 0xB7A430;
+        currentMP1_ADDR = moduleBase + 0xB7A428;
 
         //Character 2 Pointers
-        currentHP2 = moduleBase + 0xB7A494;
-        maxHP2 = moduleBase + 0xB7A498;
-        currentMP2 = moduleBase + 0x0B7A490;
+        currentHP2_ADDR = moduleBase + 0xB7A494;
+        maxHP2_ADDR = moduleBase + 0xB7A498;
+        currentMP2_ADDR = moduleBase + 0x0B7A490;
         
         _clearConsole();
     }
@@ -364,6 +374,9 @@ int ePSXe()
                 MENU_FF7(sHP, sMP, sGIL);
             }
 
+            //Battlescreen
+            
+            //HP
             if (GetAsyncKeyState(VK_NUMPAD1) & 1)
             {
                 bHP = !bHP;
@@ -371,11 +384,56 @@ int ePSXe()
                 if (bHP)
                 {
                     //We need to establish max hp first
-                    ReadProcessMemory(hProcess, (BYTE*)maxHP1, &mHP1, sizeof(mHP1), nullptr);
-                    ReadProcessMemory(hProcess, (BYTE*)maxHP2, &mHP2, sizeof(mHP2), nullptr);
+                    ReadProcessMemory(hProcess, (BYTE*)maxHP1_ADDR, &mHP1, sizeof(mHP1), nullptr);
+                    ReadProcessMemory(hProcess, (BYTE*)maxHP2_ADDR, &mHP2, sizeof(mHP2), nullptr);
                 }
             }
 
+            //MP
+            if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+            {
+                bMP = !bMP;
+
+                if (bMP)
+                {
+                    ReadProcessMemory(hProcess, (BYTE*)currentMP1_ADDR, &mMP1, sizeof(mMP1), nullptr);
+                    ReadProcessMemory(hProcess, (BYTE*)currentMP2_ADDR, &mMP2, sizeof(mMP2), nullptr);
+                    //ReadProcessMemory(hProcess, (BYTE*)currentMP3_ADDR, &mMP3, sizeof(mMP3), nullptr);
+                }
+            }
+
+            //GIL
+            if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+            {
+                bGIL = !bGIL;
+                if (bGIL)
+                {
+                    int a;
+                    //Read Current Gil
+                    ReadProcessMemory(hProcess, (BYTE*)GIL_ADDRESS, &a, sizeof(a), nullptr);
+
+                    //Make Adjustments
+                    int newValue = a + 20000;
+
+                    if (newValue > 10000000)
+                    {
+                        newValue = 9999999;
+                    }
+                    
+                    //Send Gil
+                    WriteProcessMemory(hProcess, (BYTE*)GIL_ADDRESS, &newValue, sizeof(newValue), nullptr);
+
+                    //Send Message to menu
+                    std::cout << "GIL SENT" << std::endl;
+                    Sleep(2050);
+
+                    //Cleanup
+                    bGIL = false;
+                    menuSHOWN = false;
+                }
+            }
+
+            //LOOP
             if (bHP)
             {
                 if (!HACK_LOOP)
@@ -383,22 +441,52 @@ int ePSXe()
                     sHP = "X";
                     HACK_LOOP = true;
                     menuSHOWN = false;
+                }
+                else if (sHP != "X")
+                {
+                    sHP = "X";
+                    menuSHOWN = false;
+                }
+                FF7::battleHP(hProcess, currentHP1_ADDR, currentHP2_ADDR, currentHP3_ADDR, cHP1, cHP2, cHP3, mHP1, mHP2, mHP3);
 
-                }
-                if (currentHP1 < mHP1)
-                {
-                    WriteProcessMemory(hProcess, (BYTE*)currentHP1, &maxHP1, sizeof(maxHP1), nullptr);
-                }
-                if (currentHP2 < mHP2)
-                {
-                    WriteProcessMemory(hProcess, (BYTE*)currentHP2, &maxHP2, sizeof(maxHP2), nullptr);
-                }
             }
-            else if (HACK_LOOP)
+            if (bMP)
             {
-                sHP = " ";
-                HACK_LOOP = false;
-                menuSHOWN = false;
+                if (!HACK_LOOP)
+                {
+                    sMP = "X";
+                    HACK_LOOP = true;
+                    menuSHOWN = false;
+                }
+                else if (sMP != "X")
+                {
+                    sMP = "X";
+                    menuSHOWN = false;
+                }
+                FF7::battleMP(hProcess, currentMP1_ADDR, currentMP2_ADDR, currentMP3_ADDR, cMP1, cMP2, cMP3, mMP1, mMP2, mMP3);
+            }
+
+            //Hopefully this new method should handle everything I want in a single loop 
+            //Instead of having multiple loops
+            if (HACK_LOOP)
+            {
+                if (!bHP && sHP != " ")
+                {
+                    sHP = " ";
+                    menuSHOWN = false;
+                }
+                if (!bMP && sMP != " ")
+                {
+                    sMP = " ";
+                    menuSHOWN = false;
+                }
+
+                //If all patches are requiring a loop are disabled
+                //Then we can also disable the loop
+                if (!bHP && !bMP)
+                {
+                    HACK_LOOP = false;
+                }
             }
         }
 
@@ -412,6 +500,8 @@ int ePSXe()
     return 0;
 }
 
+//Patch 0.0.51 SOCOM 2 Changes
+//- Check if player is in game
 int PCSX2()
 {
     //Set Console Window Title
@@ -1734,7 +1824,7 @@ int TheBindingofIsaac()
 #pragma region //Call of Duty Series
 int Cod4()
 {
-
+    return 0;
 }
 
 int WorldAtWar()
@@ -1794,6 +1884,7 @@ int WorldAtWar()
         _clearConsole();
         std::cout << "Process Not Found - Returning to main menu" << std::endl;
         bGAME_WorldAtWar = false;
+        bCOD_SERIES_MENU = false;
         Sleep(2050);
         return 0;
     }
@@ -1971,13 +2062,14 @@ int WorldAtWar()
     _clearConsole();
     std::cout << "Process Not Found - Returning to main menu" << std::endl;
     bGAME_WorldAtWar = false;
+    bCOD_SERIES_MENU = false;
     Sleep(2050);
     return 0;
 }
 
 int MW2()
 {
-
+    return 0;
 }
 #pragma endregion
 

@@ -48,6 +48,9 @@
     <ClCompile Include="waw.cpp">
       <Filter>COD_SERIES</Filter>
     </ClCompile>
+    <ClCompile Include="game_functions.cpp">
+      <Filter>OFFSETS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="proc.h">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="waw.h">
       <Filter>COD_SERIES</Filter>
+    </ClInclude>
+    <ClInclude Include="game_functions.h">
+      <Filter>OFFSETS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

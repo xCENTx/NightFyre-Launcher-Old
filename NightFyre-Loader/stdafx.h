@@ -18,3 +18,4 @@ using namespace std;
 
 //OFFSETS
 #include "offsets_socom.h"
+#include "game_functions.h"

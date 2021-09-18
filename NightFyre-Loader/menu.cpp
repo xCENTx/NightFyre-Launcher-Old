@@ -443,9 +443,9 @@ void MENU_FF7(string& HP, string& MP, string& GIL)
     _setConsole();
     std::cout << " ___________________________ " << std::endl;
     std::cout << "|----------PATCHES----------|" << std::endl;
-    std::cout << "|[1] INFINITE HP     => [" << HP << "]  |" << std::endl;
-    std::cout << "|[2] INFINITE MP     => [" << MP << "]  |" << std::endl;
-    std::cout << "|[3] ADD 20,000 GIL  => [" << GIL << "]  |" << std::endl;
+    std::cout << "|[1] INFINITE HP     => [" << HP << "] |" << std::endl;
+    std::cout << "|[2] INFINITE MP     => [" << MP << "] |" << std::endl;
+    std::cout << "|[3] ADD 20,000 GIL  => [" << GIL << "] |" << std::endl;
     std::cout << "|[-] MAIN MENU              |" << std::endl;
     std::cout << "|[END] QUIT                 |" << std::endl;
     std::cout << "|--Final-Fantasy-7---xCENTx-| v1.0" << std::endl;
