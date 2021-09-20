@@ -500,8 +500,7 @@ int ePSXe()
     return 0;
 }
 
-//Patch 0.0.51 SOCOM 2 Changes
-//- Check if player is in game
+//need to introduce a single loop for all hacks which will keep anything toggled so the user does not have to manually re activate on each round
 int PCSX2()
 {
     //Set Console Window Title
@@ -681,12 +680,7 @@ int PCSX2()
                 return 0;
             }
         }
-
-        //Patch 0.0.51
-        //Bunch of checks if user is in game
-        //Anti cheat seems to be booting players who activate while not in match
-        //code scanner does not function while in game 
-        //need to introduce a single loop for all hacks which will keep anything toggled so the user does not have to manually re activate on each round
+ 
         if (bGAME_SOCOM2)
         {
             if (!menuSHOWN)
@@ -1081,7 +1075,7 @@ int PCSX2()
                 }
             }
 
-            // PERFECT SHOT (VIP OPTION)
+            //PERFECT SHOT (VIP OPTION)
             if (GetAsyncKeyState(VK_NUMPAD2) & 1)
             {
                 bPerfectShot_S3 = !bPerfectShot_S3;
@@ -1368,6 +1362,7 @@ int FarCry3()
     //Set Console Window Title
     SetConsoleTitle(L"Far Cry R3L0AD3D | CONSOLE");
 
+    #pragma region VARIABLES
     //Establish Variables
     HANDLE hProcess = 0;
     uintptr_t moduleBase = 0, PointerBase = 0;
@@ -1382,7 +1377,8 @@ int FarCry3()
 
     //Empty Variables
     int cAMMO;
-
+    #pragma endregion
+    
     std::cout << "Searching for Far Cry 3 Ubisoft Store Edition . . ." << std::endl;
     Sleep(1050);
 
@@ -1802,23 +1798,368 @@ int AssaultCube()
 
 int TheBindingofIsaac()
 {
-    string HEALTH = " ", BOMBS = " ", DAMAGE = " ", FIRERATE = " ", COINS = " ";
-    SetConsoleTitle(L"The Binding of Isaac - DLC | CONSOLE");
-    _clearConsole();
-    MENU_ISAAC(HEALTH, BOMBS, DAMAGE, FIRERATE, COINS);
+    SetConsoleTitle(L"The Binding of Isaac: Wrath of The Lamb | CONSOLE");
+ 
+    #pragma region VARIABLES
+    HANDLE hProcess = 0;
+    uintptr_t moduleBase = 0;
+    uintptr_t HEALTH_ADDR = 0, BOMBS_ADDR = 0, DAMAGE_ADDR = 0, FIRERATE_ADDR = 0, COINS_ADDR = 0, COINS2_ADDR = 0;
+    bool HACK_LOOP = false;
 
-    while (MENU_ISAAC)
+    //BOOLS
+    bool bHEALTH = false, bBOMBS = false, bDAMAGE = false, bFIRERATE = false, bCOINS = false;
+    
+    //STRINGS
+    string sHEALTH = " ", sBOMBS = " ", sDAMAGE = " ", sFIRERATE = " ", sCOINS = " ";
+    #pragma endregion
+    
+    std::cout << "Searching for The Binding of Isaac: Wrath of The Lamb" << std::endl;
+    Sleep(1050);
+
+    DWORD procID = GetProcId(L"isaac.exe");
+    if (procID)
     {
-        if (GetAsyncKeyState(VK_SUBTRACT) & 1)
+        std::cout << "Process found , Connecting . . ." << std::endl;
+        Sleep(750);
+
+        //Let user know we have established connection with the process
+        std::cout << "Connection Established" << std::endl;
+        Sleep(1050);
+
+        // Get Handle to process
+        hProcess = OpenProcess(PROCESS_ALL_ACCESS, NULL, procID);
+        std::cout << "Gathering Process Information . . ." << std::endl;
+        Sleep(750);
+
+        //Get module base address
+        moduleBase = GetModuleBaseAddress(procID, L"isaac.exe");
+        std::cout << "Established Base Address . . ." << std::endl;
+        Sleep(750);
+
+        HEALTH_ADDR = 0x1656f75E;
+        BOMBS_ADDR = 0x1658A05A;
+        DAMAGE_ADDR = 0x1655C1B4;
+        FIRERATE_ADDR = 0x1658BAA4;
+        COINS_ADDR = 0x1657C0FF;
+        COINS2_ADDR = 0x1657C6A2;
+        std::cout << "Resolving Pointers" << std::endl;
+
+        std::cout << "SUCCESS! , Loading Menu . . ." << std::endl;
+        Sleep(2050);
+        _clearConsole();
+    }
+    else
+    {
+        _clearConsole();
+        std::cout << "Process Not Found - Returning to main menu" << std::endl;
+        bGAME_ISAAC = false;
+        Sleep(2050);
+        return 0;
+    }
+    DWORD dwExit = 0;
+    
+    while (GetExitCodeProcess(hProcess, &dwExit) && dwExit == STILL_ACTIVE)
+    {
+        if (bGAME_ISAAC)
         {
-            //Sleep(5050);
-            _clearConsole();
-            //std::cout << "Process Not Found - Returning to main menu" << std::endl;
-            bGAME_ISAAC = false;
-            //Sleep(2050);
-            return 0;
+            if (!menuSHOWN)
+            {
+                menuSHOWN = true;
+                _clearConsole();
+                MENU_ISAAC(sHEALTH, sBOMBS, sDAMAGE, sFIRERATE, sCOINS);
+            }
+
+            //INFINITE HEALTH
+            if (GetAsyncKeyState(VK_NUMPAD1) & 1)
+            {
+                bHEALTH = !bHEALTH;
+
+                if (bHEALTH)
+                {
+                    int VALUE;
+                    ReadProcessMemory((BYTE*)hProcess, (BYTE*)HEALTH_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 93736715)
+                    {
+                        mem::PatchEx((BYTE*)HEALTH_ADDR, (BYTE*)"\x0A", 1, hProcess);
+                        sHEALTH = "X";
+                        menuSHOWN = false;
+                    }
+                }
+                else
+                {
+                    int VALUE;
+                    ReadProcessMemory((BYTE*)hProcess, (BYTE*)HEALTH_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 93736714)
+                    {
+                        mem::PatchEx((BYTE*)HEALTH_ADDR, (BYTE*)"\x0B", 1, hProcess);
+                        sHEALTH = " ";
+                        menuSHOWN = false;
+                    }
+                }
+            }
+            
+            //INFINITE BOMBS
+            if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+            {
+                bBOMBS = !bBOMBS;
+
+                if (bBOMBS)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)BOMBS_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 43601745)
+                    {
+                        mem::PatchEx((BYTE*)BOMBS_ADDR, (BYTE*)"\x50", 1, hProcess);
+                        sBOMBS = "X";
+                        menuSHOWN = false;
+                    }
+                }
+                else
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)BOMBS_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 43601744)
+                    {
+                        mem::PatchEx((BYTE*)BOMBS_ADDR, (BYTE*)"\x51", 1, hProcess);
+                        sBOMBS = " ";
+                        menuSHOWN = false;
+                    }
+                }
+            }
+            
+            //MAX DAMAGE
+            if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+            {
+                bDAMAGE = !bDAMAGE;
+                if (bDAMAGE)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)DAMAGE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 0)
+                    {
+                        mem::PatchEx((BYTE*)DAMAGE_ADDR, (BYTE*)"\x00\x40\x6F\x40", 3, hProcess);
+                        sDAMAGE = "X";
+                        menuSHOWN = false;
+                    }
+                }
+                else
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)DAMAGE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE != 0)
+                    {
+                        mem::PatchEx((BYTE*)DAMAGE_ADDR, (BYTE*)"\x00\x00\x00\x00", 3, hProcess);
+                        sDAMAGE = " ";
+                        menuSHOWN = false;
+                    }
+                }
+            }
+            
+            //MAX FIRE RATE
+            if (GetAsyncKeyState(VK_NUMPAD4) & 1)
+            {
+                bFIRERATE = !bFIRERATE;
+                if (bFIRERATE)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)FIRERATE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 1543)
+                    {
+                        mem::PatchEx((BYTE*)FIRERATE_ADDR, (BYTE*)"\x07\xFF", 2, hProcess);
+                        sFIRERATE = "X";
+                        menuSHOWN = false;
+                    }
+                }
+                else
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)FIRERATE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 65287)
+                    {
+                        mem::PatchEx((BYTE*)FIRERATE_ADDR, (BYTE*)"\x07\x06", 2, hProcess);
+                        sFIRERATE = " ";
+                        menuSHOWN = false;
+                    }
+                }
+            }
+
+            //INFINITE COINS
+            if (GetAsyncKeyState(VK_NUMPAD5) & 1)
+            {
+                bCOINS = !bCOINS;
+                if (bCOINS)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)0x1657C0FC, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 1364071944)
+                    {
+                        mem::PatchEx((BYTE*)COINS_ADDR, (BYTE*)"\x02", 1, hProcess);
+                        mem::PatchEx((BYTE*)COINS2_ADDR, (BYTE*)"\x47", 1, hProcess);
+                    }
+                    sCOINS = "X";
+                    menuSHOWN = false;
+                }
+                else
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)0x1657C0FC, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 38671880)
+                    {
+                        mem::PatchEx((BYTE*)COINS_ADDR, (BYTE*)"\x51", 1, hProcess);
+                        mem::PatchEx((BYTE*)COINS2_ADDR, (BYTE*)"\x0B", 1, hProcess);
+                    }
+                    sCOINS = " ";
+                    menuSHOWN = false;
+                }
+            }
+            
+            //Return to Main or Exit
+            if (GetAsyncKeyState(VK_SUBTRACT) & 1)
+            {
+                _clearConsole();
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (bHEALTH)
+                {
+                    int VALUE;
+                    ReadProcessMemory((BYTE*)hProcess, (BYTE*)HEALTH_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 93736714)
+                    {
+                        int newVALUE = 93736715;
+                        WriteProcessMemory(hProcess, (BYTE*)HEALTH_ADDR, &newVALUE, sizeof(newVALUE), nullptr);
+                        sHEALTH = " ";
+                        bHEALTH = false;
+                    }
+                }
+                if (bBOMBS)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)BOMBS_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 43601744)
+                    {
+                        int newVALUE = 43601745;
+                        WriteProcessMemory(hProcess, (BYTE*)BOMBS_ADDR, &newVALUE, sizeof(newVALUE), nullptr);
+                        sBOMBS = " ";
+                        bBOMBS = false;
+                    }
+                }
+                if (bDAMAGE)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)DAMAGE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE != 0)
+                    {
+                        mem::PatchEx((BYTE*)DAMAGE_ADDR, (BYTE*)"\x00\x00\x00\x00", 3, hProcess);
+                        sDAMAGE = " ";
+                        bDAMAGE = false;
+                    }
+                }
+                if (bFIRERATE)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)FIRERATE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 65287)
+                    {
+                        mem::PatchEx((BYTE*)FIRERATE_ADDR, (BYTE*)"\x07\x06", 2, hProcess);
+                        sFIRERATE = " ";
+                        bFIRERATE = false;
+                    }
+                }
+                if (bCOINS)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)0x1657C0FC, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 38671880)
+                    {
+                        mem::PatchEx((BYTE*)COINS_ADDR, (BYTE*)"\x51", 1, hProcess);
+                        mem::PatchEx((BYTE*)COINS2_ADDR, (BYTE*)"\x0B", 1, hProcess);
+                    }
+                    sCOINS = " ";
+                    bCOINS = false;
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
+                _clearConsole();
+                bGAME_ISAAC = false;
+                menuSHOWN = false;
+                return 0;
+            }
+            if (GetAsyncKeyState(VK_END) & 1)
+            {
+                _clearConsole();
+                std::cout << "Restoring defaults , Please do not close window" << std::endl;
+                Sleep(2050);
+                if (bHEALTH)
+                {
+                    int VALUE;
+                    ReadProcessMemory((BYTE*)hProcess, (BYTE*)HEALTH_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 93736714)
+                    {
+                        int newVALUE = 93736715;
+                        WriteProcessMemory(hProcess, (BYTE*)HEALTH_ADDR, &newVALUE, sizeof(newVALUE), nullptr);
+                        sHEALTH = " ";
+                        bHEALTH = false;
+                    }
+                }
+                if (bBOMBS)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)BOMBS_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 43601744)
+                    {
+                        int newVALUE = 43601745;
+                        WriteProcessMemory(hProcess, (BYTE*)BOMBS_ADDR, &newVALUE, sizeof(newVALUE), nullptr);
+                        sBOMBS = " ";
+                        bBOMBS = false;
+                    }
+                }
+                if (bDAMAGE)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)DAMAGE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE != 0)
+                    {
+                        mem::PatchEx((BYTE*)DAMAGE_ADDR, (BYTE*)"\x00\x00\x00\x00", 3, hProcess);
+                        sDAMAGE = " ";
+                        bDAMAGE = false;
+                    }
+                }
+                if (bFIRERATE)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)FIRERATE_ADDR, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 65287)
+                    {
+                        mem::PatchEx((BYTE*)FIRERATE_ADDR, (BYTE*)"\x07\x06", 2, hProcess);
+                        sFIRERATE = " ";
+                        bFIRERATE = false;
+                    }
+                }
+                if (bCOINS)
+                {
+                    int VALUE;
+                    ReadProcessMemory(hProcess, (BYTE*)0x1657C0FC, &VALUE, sizeof(VALUE), nullptr);
+                    if (VALUE == 38671880)
+                    {
+                        mem::PatchEx((BYTE*)COINS_ADDR, (BYTE*)"\x51", 1, hProcess);
+                        mem::PatchEx((BYTE*)COINS2_ADDR, (BYTE*)"\x0B", 1, hProcess);
+                    }
+                    sCOINS = " ";
+                    bCOINS = false;
+                }
+                std::cout << "Sucessfully restored game data to defaults!" << std::endl;
+                _clearConsole();
+                bGAME_ISAAC = false;
+                menuSHOWN = false;
+                MAINMENU = false;
+                return 0;
+            }
         }
     }
+    _clearConsole();
+    std::cout << "Process Not Found - Returning to main menu" << std::endl;
+    bGAME_ISAAC = false;
+    Sleep(2050);
+    return 0;
 }
 
 #pragma region //Call of Duty Series

@@ -46,10 +46,11 @@ void _MAINMENU()
                /$$  \ $$                            /$$  | $$                    
               |  $$$$$$/                           |  $$$$$$/                    
                \______/                             \______/                     
-                       v0.0.5 (alpha - [VIP] preview)
+                       v0.0.55 (alpha - [VIP] preview)
 )" << std::endl;
 }
 
+//ALT MENUS FOR GAMES WITH MULTIPLE VERSIONS
 void MENU_SOCOM_SELECT()
 {
     _setConsole();
@@ -87,54 +88,9 @@ CoD 5 World at War Is the only functional menu for now
 }
 #pragma endregion
 
-#pragma region //Call of Duty Series
-void selectCODwaw()
-{
-    _clearConsole();
-    _artCODwaw();
-    Sleep(2050);
-}
-
-void _artCODwaw()
-{
-    _clearConsole();
-    std::cout << R"(
-   ____      _ _          __   ____        _                    
-  / ___|__ _| | |   ___  / _| |  _ \ _   _| |_ _   _ _          
- | |   / _` | | |  / _ \| |_  | | | | | | | __| | | (_)         
- | |__| (_| | | | | (_) |  _| | |_| | |_| | |_| |_| |_          
- _\____\__,_|_|_|  \___/|_| _ |____/ \__,_|\__|\__, (_)         
- \ \      / /__  _ __| | __| |   __ _| |_  \ \ |___// /_ _ _ __ 
-  \ \ /\ / / _ \| '__| |/ _` |  / _` | __|  \ \ /\ / / _` | '__|
-   \ V  V / (_) | |  | | (_| | | (_| | |_    \ V  V / (_| | |   
-    \_/\_/ \___/|_|  |_|\__,_|  \__,_|\__|    \_/\_/ \__,_|_|   
-                                                                
-)" << std::endl;
-}
-
-void MENU_CODwaw(string& HEALTH, string& AMMO, string& rFIRE, string& FLY, string& LASER, string& PROMOD, string& FPS, string& xCENTx, string& POINTS)
-{
-    _setConsole();
-    std::cout << " ______________________________ \n";
-    std::cout << "|--Call of Duty: World at War--|\n";
-    std::cout << "|[1] INF HEALTH        => [" << HEALTH << "]  |\n";
-    std::cout << "|[2] INF AMMO          => [" << AMMO << "]  |\n";
-    std::cout << "|[3] RAPID FIRE        => [" << rFIRE << "]  |\n";
-    std::cout << "|[4] NO CLIP           => [" << FLY << "]  |\n";
-    std::cout << "|[5] GUN LASER         => [" << LASER << "]  |\n";
-    std::cout << "|[6] PRO MOD           => [" << PROMOD << "]  |\n";
-    std::cout << "|[7] DRAW FPS          => [" << FPS << "]  |\n";
-    std::cout << "|[8] xCENTx MOD        => [" << xCENTx << "]  |\n";
-    std::cout << "|[9] GIVE MAX POINTS   => [" << POINTS << "]  |\n";
-    std::cout << "|[END] QUIT                    |\n";
-    std::cout << "|______________________________|" << std::endl;
-}
-#pragma endregion
-
-
 
 //1
-#pragma region //SOCOM
+#pragma region //SOCOM SERIES
 void select_S1()
 {
     _clearConsole();
@@ -297,6 +253,51 @@ void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& FORCESTART)
 #pragma endregion
 
 //2
+#pragma region //Call of Duty Series
+void selectCODwaw()
+{
+    _clearConsole();
+    _artCODwaw();
+    Sleep(2050);
+}
+
+void _artCODwaw()
+{
+    _clearConsole();
+    std::cout << R"(
+   ____      _ _          __   ____        _                    
+  / ___|__ _| | |   ___  / _| |  _ \ _   _| |_ _   _ _          
+ | |   / _` | | |  / _ \| |_  | | | | | | | __| | | (_)         
+ | |__| (_| | | | | (_) |  _| | |_| | |_| | |_| |_| |_          
+ _\____\__,_|_|_|  \___/|_| _ |____/ \__,_|\__|\__, (_)         
+ \ \      / /__  _ __| | __| |   __ _| |_  \ \ |___// /_ _ _ __ 
+  \ \ /\ / / _ \| '__| |/ _` |  / _` | __|  \ \ /\ / / _` | '__|
+   \ V  V / (_) | |  | | (_| | | (_| | |_    \ V  V / (_| | |   
+    \_/\_/ \___/|_|  |_|\__,_|  \__,_|\__|    \_/\_/ \__,_|_|   
+                                                                
+)" << std::endl;
+}
+
+void MENU_CODwaw(string& HEALTH, string& AMMO, string& rFIRE, string& FLY, string& LASER, string& PROMOD, string& FPS, string& xCENTx, string& POINTS)
+{
+    _setConsole();
+    std::cout << " ______________________________ \n";
+    std::cout << "|--Call of Duty: World at War--|\n";
+    std::cout << "|[1] INF HEALTH        => [" << HEALTH << "]  |\n";
+    std::cout << "|[2] INF AMMO          => [" << AMMO << "]  |\n";
+    std::cout << "|[3] RAPID FIRE        => [" << rFIRE << "]  |\n";
+    std::cout << "|[4] NO CLIP           => [" << FLY << "]  |\n";
+    std::cout << "|[5] GUN LASER         => [" << LASER << "]  |\n";
+    std::cout << "|[6] PRO MOD           => [" << PROMOD << "]  |\n";
+    std::cout << "|[7] DRAW FPS          => [" << FPS << "]  |\n";
+    std::cout << "|[8] xCENTx MOD        => [" << xCENTx << "]  |\n";
+    std::cout << "|[9] GIVE MAX POINTS   => [" << POINTS << "]  |\n";
+    std::cout << "|[END] QUIT                    |\n";
+    std::cout << "|______________________________|" << std::endl;
+}
+#pragma endregion
+
+//3
 #pragma region  //FAR CRY 3
 void select_FC3()
 {
@@ -336,42 +337,6 @@ void MENU_FARCRY_3(string& money, string& ammo)
 }
 #pragma endregion
 
-//3
-#pragma region  //ASSAULT CUBE
-void select_ASSAULT_CUBE()
-{
-    _clearConsole();
-    _artASSAULTCUBE();
-    Sleep(2050);
-}
-
-void _artASSAULTCUBE()
-{
-    _clearConsole();
-    std::cout << R"(
-   _                       _ _       ___      _          
-  /_\  ___ ___  __ _ _   _| | |_    / __\   _| |__   ___ 
- //_\\/ __/ __|/ _` | | | | | __|  / / | | | | '_ \ / _ \
-/  _  \__ \__ \ (_| | |_| | | |_  / /__| |_| | |_) |  __/
-\_/ \_/___/___/\__,_|\__,_|_|\__| \____/\__,_|_.__/ \___|
-                                                         
-)" << std::endl;
-}
-
-void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL)
-{
-    _setConsole();
-    std::cout << " ___________________________ " << std::endl;
-    std::cout << "|----------PATCHES----------|" << std::endl;
-    std::cout << "|[1] INFINITE HEALTH => [" << HEALTH << "] |" << std::endl;
-    std::cout << "|[2] INFINITE AMMO   => [" << AMMO << "] |" << std::endl;
-    std::cout << "|[3] NO RECOIL       => [" << RECOIL << "] |" << std::endl;
-    std::cout << "|[-] MAIN MENU              |" << std::endl;
-    std::cout << "|[END] QUIT                 |" << std::endl;
-    std::cout << "|----Assault--Cube--xCENTx--| v1.0" << std::endl;
-}
-#pragma endregion
-
 //4
 #pragma region //BINDING OF ISAAC
 void select_ISAAC()
@@ -406,13 +371,7 @@ void MENU_ISAAC(string& HEALTH, string& BOMBS, string& DAMAGE, string& FIRERATE,
     std::cout << "|[5] INFINITE COINS   => [" << COINS << "] |" << std::endl;
     std::cout << "|[-] MAIN MENU               |" << std::endl;
     std::cout << "|[END] QUIT                  |" << std::endl;
-    std::cout << "|--Binding-of-Isaac--xCENTx--| v0.1" << std::endl;
-    std::cout << R"(
-NOT IMPLEMENTED QUITE YET , IM GLAD YOU ARE INTERESTED IN THIS OPTION
-Stay Tuned For Updates !!
-
-P.S , If you are seeing this message , be sure to shoot me a PM and tell me how much you want this added
-)" << std::endl;
+    std::cout << "|--Binding-of-Isaac--xCENTx--| v1.0" << std::endl;
 }
 #pragma endregion
 
@@ -453,8 +412,39 @@ void MENU_FF7(string& HP, string& MP, string& GIL)
 #pragma endregion
 
 //6
-#pragma region  //
+#pragma region  //ASSAULT CUBE
+void select_ASSAULT_CUBE()
+{
+    _clearConsole();
+    _artASSAULTCUBE();
+    Sleep(2050);
+}
 
+void _artASSAULTCUBE()
+{
+    _clearConsole();
+    std::cout << R"(
+   _                       _ _       ___      _          
+  /_\  ___ ___  __ _ _   _| | |_    / __\   _| |__   ___ 
+ //_\\/ __/ __|/ _` | | | | | __|  / / | | | | '_ \ / _ \
+/  _  \__ \__ \ (_| | |_| | | |_  / /__| |_| | |_) |  __/
+\_/ \_/___/___/\__,_|\__,_|_|\__| \____/\__,_|_.__/ \___|
+                                                         
+)" << std::endl;
+}
+
+void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL)
+{
+    _setConsole();
+    std::cout << " ___________________________ " << std::endl;
+    std::cout << "|----------PATCHES----------|" << std::endl;
+    std::cout << "|[1] INFINITE HEALTH => [" << HEALTH << "] |" << std::endl;
+    std::cout << "|[2] INFINITE AMMO   => [" << AMMO << "] |" << std::endl;
+    std::cout << "|[3] NO RECOIL       => [" << RECOIL << "] |" << std::endl;
+    std::cout << "|[-] MAIN MENU              |" << std::endl;
+    std::cout << "|[END] QUIT                 |" << std::endl;
+    std::cout << "|----Assault--Cube--xCENTx--| v1.0" << std::endl;
+}
 #pragma endregion
 
 //7
