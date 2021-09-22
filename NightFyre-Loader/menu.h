@@ -12,7 +12,7 @@ void select_DEATHLY_STILLNESS();
 #pragma region  //ASSAULT CUBE
 void select_ASSAULT_CUBE();
 void _artASSAULTCUBE();
-void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL);
+void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL, string& NOCLIP);
 #pragma endregion
 
 #pragma region //BINDING OF ISAAC

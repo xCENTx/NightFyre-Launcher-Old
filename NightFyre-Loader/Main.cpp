@@ -1,3 +1,8 @@
+//v0.0.6
+//UPDATE NOTES
+//- Updated Hack Loop Thread
+//- 
+
 #include "stdafx.h"
 
 void _ANCHOR();
@@ -283,11 +288,8 @@ void _ANCHOR()
     _MAINMENU();
 }
 
-///GAME MENUS
 
-///Patch 0.0.51
-//Intereresting methods to note
-//- HACK LOOP
+///GAME MENUS
 int ePSXe()
 {
     SetConsoleTitle(L"ePSXe v2.0.5 - Final Fantasy 7 | CONSOLE");
@@ -489,7 +491,6 @@ int ePSXe()
                 }
             }
         }
-
         Sleep(10);
     }
 
@@ -500,7 +501,8 @@ int ePSXe()
     return 0;
 }
 
-//need to introduce a single loop for all hacks which will keep anything toggled so the user does not have to manually re activate on each round
+// - Need to introduce a single loop for all hacks which will keep anything toggled so the user does not have to manually re activate on each round
+//- FOG , FPS , Crosshair color all reset between rounds
 int PCSX2()
 {
     //Set Console Window Title
@@ -1357,10 +1359,12 @@ int PCSX2()
     return 0;
 }
 
+//PATCH v0.0.6
+//UPDATED HACK LOOP
 int FarCry3()
 {
     //Set Console Window Title
-    SetConsoleTitle(L"Far Cry R3L0AD3D | CONSOLE");
+    SetConsoleTitle(L"Far Cry 3 R3L0AD3D | CONSOLE");
 
     #pragma region VARIABLES
     //Establish Variables
@@ -1494,7 +1498,6 @@ int FarCry3()
             if (GetAsyncKeyState(VK_END) & 1)
             {
                 _clearConsole();
-                //RESTORE DEFAULTS
                 std::cout << "Restoring defaults , Please do not close window" << std::endl;
                 Sleep(2050);
                 if (bAMMO)
@@ -1510,7 +1513,7 @@ int FarCry3()
                 return 0;
             }
 
-            //LOOPS
+            //HACK LOOP
             if (bAMMO)
             {
                 if (!HACK_LOOP)
@@ -1519,24 +1522,33 @@ int FarCry3()
                     HACK_LOOP = true;
                     menuSHOWN = false;
                 }
+                else if (sAMMO != "X")
+                {
+                    sAMMO = "X";
+                    menuSHOWN = false;
+                }
 
                 ammoADDRESS = FindDMAAddy(hProcess, PointerBase, { 0x4, 0x38, 0x4, 0x20, 0x280, 0x48, 0xCC });
-
                 if (ammoADDRESS != _baseAmmoADDRESS)
                 {
                     _baseAmmoADDRESS = ammoADDRESS;
                     ammoADDRESS = 0;
                     ReadProcessMemory(hProcess, (BYTE*)_baseAmmoADDRESS, &cAMMO, sizeof(cAMMO), nullptr);
                 }
-
                 WriteProcessMemory(hProcess, (BYTE*)_baseAmmoADDRESS, &cAMMO, sizeof(cAMMO), nullptr);
             }
             else if (HACK_LOOP)
             {
-                HACK_LOOP = false;
-                menuSHOWN = false;
-                bAMMO = false;
-                sAMMO = " ";
+                if (bAMMO && sAMMO != " ")
+                {
+                    bAMMO = false;
+                    sAMMO = " ";
+                    menuSHOWN = false;
+                }
+                if (!bAMMO)
+                {
+                    HACK_LOOP = false;
+                }
             }
         }
     }
@@ -1548,23 +1560,28 @@ int FarCry3()
     return 0;
 }
 
+//PATCH v0.0.6
+//UPDATED HACK LOOP
 int AssaultCube()
 {
     SetConsoleTitle(L"Assault Cube R3L0AD3D | CONSOLE");
 
+    #pragma region //VARIABLES
     //Establish Variables
     HANDLE hProcess = 0;
     uintptr_t moduleBase = 0, PointerBase = 0, ammoBase = 0, recoilBase = 0;
-    uintptr_t _baseHealthADDRESS = 0, healthADDRESS = 0, _baseAmmoADDRESS = 0, ammoADDRESS = 0, playerX = 0, playerY = 0, playerZ = 0;
-    bool HACK_LOOP = false, HACK_LOOP2 = false;
-    bool bAMMO = false, bHEALTH = false, bRECOIL = false;
-    string sHEALTH = " ", sAMMO = " ", sRECOIL = " ";
+    uintptr_t entityAddress = 0, _baseHealthADDRESS = 0, healthADDRESS = 0, _baseAmmoADDRESS = 0, ammoADDRESS = 0, playerX = 0, playerY = 0, playerZ = 0;
+    uintptr_t spectateAddress = 0, invisibleAddress = 0;
+    bool HACK_LOOP = false;
+    bool bAMMO = false, bHEALTH = false, bRECOIL = false, bNOCLIP = false;
+    string sHEALTH = " ", sAMMO = " ", sRECOIL = " ", sNOCLIP = " ";
 
     //Empty Variables
     int cHEALTH;
     int cARMOR;
     int cAMMO;
-
+    #pragma endregion
+    
     std::cout << "Searching for Assault Cube . . ." << std::endl;    // Text to console for end-user to read
     Sleep(1050);
 
@@ -1631,7 +1648,7 @@ int AssaultCube()
             {
                 menuSHOWN = true;
                 _clearConsole();
-                MENU_ASSAULT_CUBE(sHEALTH, sAMMO, sRECOIL);
+                MENU_ASSAULT_CUBE(sHEALTH, sAMMO, sRECOIL, sNOCLIP);
             }
 
             if (GetAsyncKeyState(VK_NUMPAD1) & 1)
@@ -1671,6 +1688,34 @@ int AssaultCube()
                     mem::PatchEx((BYTE*)recoilBase, (BYTE*)"\x55\x8b\xEC", 3, hProcess);
                 }
             }
+
+            if (GetAsyncKeyState(VK_NUMPAD4) & 1)
+            {
+                bNOCLIP = !bNOCLIP;
+                ReadProcessMemory(hProcess, (BYTE*)ammoBase, &entityAddress, sizeof(entityAddress), nullptr);
+                invisibleAddress = entityAddress + 0x82;
+                spectateAddress = entityAddress + 0x338;
+
+                if (bNOCLIP)
+                {
+                    int invisibleON = 11;
+                    int spectateON = 5;
+                    WriteProcessMemory(hProcess, (BYTE*)invisibleAddress, &invisibleON, sizeof(invisibleON), nullptr);
+                    WriteProcessMemory(hProcess, (BYTE*)spectateAddress, &spectateON, sizeof(spectateON), nullptr);
+                    sNOCLIP = "X";
+                    menuSHOWN = false;
+                }
+                else
+                {
+                    int invisibleON = 0;
+                    int spectateON = 0;
+                    WriteProcessMemory(hProcess, (BYTE*)invisibleAddress, &invisibleON, sizeof(invisibleON), nullptr);
+                    WriteProcessMemory(hProcess, (BYTE*)spectateAddress, &spectateON, sizeof(spectateON), nullptr);
+                    sNOCLIP = " ";
+                    menuSHOWN = false;
+                }
+            }
+
             //Return to Main or Exit
             if (GetAsyncKeyState(VK_SUBTRACT) & 1)
             {
@@ -1686,7 +1731,7 @@ int AssaultCube()
                 }
                 if (bAMMO)
                 {
-                    HACK_LOOP2 = false;
+                    HACK_LOOP = false;
                     bAMMO = false;
                     sAMMO = " ";
                 }
@@ -1695,6 +1740,15 @@ int AssaultCube()
                     mem::PatchEx((BYTE*)recoilBase, (BYTE*)"\x55\x8b\xEC", 3, hProcess);
                     bRECOIL = false;
                     sRECOIL = " ";
+                }
+                if (bNOCLIP)
+                {
+                    int invisibleON = 0;
+                    int spectateON = 0;
+                    WriteProcessMemory(hProcess, (BYTE*)invisibleAddress, &invisibleON, sizeof(invisibleON), nullptr);
+                    WriteProcessMemory(hProcess, (BYTE*)spectateAddress, &spectateON, sizeof(spectateON), nullptr);
+                    sNOCLIP = " ";
+                    bNOCLIP = false;
                 }
                 std::cout << "Sucessfully restored game data to defaults!" << std::endl;
                 _clearConsole();
@@ -1716,7 +1770,7 @@ int AssaultCube()
                 }
                 if (bAMMO)
                 {
-                    HACK_LOOP2 = false;
+                    HACK_LOOP = false;
                     bAMMO = false;
                     sAMMO = " ";
                 }
@@ -1726,6 +1780,15 @@ int AssaultCube()
                     bRECOIL = false;
                     sRECOIL = " ";
                 }
+                if (bNOCLIP)
+                {
+                    int invisibleON = 0;
+                    int spectateON = 0;
+                    WriteProcessMemory(hProcess, (BYTE*)invisibleAddress, &invisibleON, sizeof(invisibleON), nullptr);
+                    WriteProcessMemory(hProcess, (BYTE*)spectateAddress, &spectateON, sizeof(spectateON), nullptr);
+                    sNOCLIP = " ";
+                    bNOCLIP = false;
+                }
                 std::cout << "Sucessfully restored game data to defaults!" << std::endl;
                 _clearConsole();
                 bGAME_ASSAULT_CUBE = false;
@@ -1734,6 +1797,7 @@ int AssaultCube()
                 return 0;
             }
 
+            //HACK THREADS
             if (bHEALTH)
             {
                 if (!HACK_LOOP)
@@ -1742,50 +1806,66 @@ int AssaultCube()
                     HACK_LOOP = true;
                     menuSHOWN = false;
                 }
-                healthADDRESS = FindDMAAddy(hProcess, PointerBase, { 0xF8 });
+                else if (sHEALTH != " ")
+                {
+                    sHEALTH = "X";
+                    menuSHOWN = false;
+                }
 
+                healthADDRESS = FindDMAAddy(hProcess, PointerBase, { 0xF8 });
                 if (healthADDRESS != _baseHealthADDRESS)
                 {
                     _baseHealthADDRESS = healthADDRESS;
                     healthADDRESS = 0;
                     ReadProcessMemory(hProcess, (BYTE*)_baseHealthADDRESS, &cHEALTH, sizeof(cHEALTH), nullptr);
                 }
-
                 WriteProcessMemory(hProcess, (BYTE*)_baseHealthADDRESS, &cHEALTH, sizeof(cHEALTH), nullptr);
-            }
-            else if (HACK_LOOP)
-            {
-                HACK_LOOP = false;
-                menuSHOWN = false;
-                bHEALTH = false;
-                sHEALTH = " ";
             }
 
             if (bAMMO)
             {
-                if (!HACK_LOOP2)
+                if (!HACK_LOOP)
                 {
                     sAMMO = "X";
-                    HACK_LOOP2 = true;
+                    HACK_LOOP = true;
+                    menuSHOWN = false;
+                }
+                else if (sAMMO != "X")
+                {
+                    sAMMO = "X";
                     menuSHOWN = false;
                 }
                 ammoADDRESS = FindDMAAddy(hProcess, ammoBase, { 0x374, 0x14, 0x0 });
-
                 if (ammoADDRESS != _baseAmmoADDRESS)
                 {
                     _baseAmmoADDRESS = ammoADDRESS;
                     ammoADDRESS = 0;
                     ReadProcessMemory(hProcess, (BYTE*)_baseAmmoADDRESS, &cAMMO, sizeof(cAMMO), nullptr);
                 }
-
                 WriteProcessMemory(hProcess, (BYTE*)_baseAmmoADDRESS, &cAMMO, sizeof(cAMMO), nullptr);
             }
-            else if (HACK_LOOP2)
+
+            //MAIN LOOP
+            if (HACK_LOOP)
             {
-                HACK_LOOP2 = false;
-                menuSHOWN = false;
-                bAMMO = false;
-                sAMMO = " ";
+                if (!bHEALTH && sHEALTH != " ")
+                {
+                    menuSHOWN = false;
+                    bHEALTH = false;
+                    sHEALTH = " ";
+                }
+
+                if (!bAMMO && sAMMO != " ")
+                {
+                    menuSHOWN = false;
+                    bAMMO = false;
+                    sAMMO = " ";
+                }
+
+                if (!bHEALTH && !bAMMO)
+                {
+                    HACK_LOOP = false;
+                }
             }
         }
     }

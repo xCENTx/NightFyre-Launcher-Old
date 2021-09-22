@@ -433,7 +433,7 @@ void _artASSAULTCUBE()
 )" << std::endl;
 }
 
-void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL)
+void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL, string& NOCLIP)
 {
     _setConsole();
     std::cout << " ___________________________ " << std::endl;
@@ -441,6 +441,7 @@ void MENU_ASSAULT_CUBE(string& HEALTH, string& AMMO, string& RECOIL)
     std::cout << "|[1] INFINITE HEALTH => [" << HEALTH << "] |" << std::endl;
     std::cout << "|[2] INFINITE AMMO   => [" << AMMO << "] |" << std::endl;
     std::cout << "|[3] NO RECOIL       => [" << RECOIL << "] |" << std::endl;
+    std::cout << "|[4] NO CLIP         => [" << NOCLIP << "] |" << std::endl;
     std::cout << "|[-] MAIN MENU              |" << std::endl;
     std::cout << "|[END] QUIT                 |" << std::endl;
     std::cout << "|----Assault--Cube--xCENTx--| v1.0" << std::endl;
