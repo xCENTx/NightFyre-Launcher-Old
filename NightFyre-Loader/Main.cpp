@@ -288,7 +288,6 @@ void _ANCHOR()
     _MAINMENU();
 }
 
-
 ///GAME MENUS
 int ePSXe()
 {
@@ -523,7 +522,8 @@ int PCSX2()
     //CA Perfect Shot
     uintptr_t ospread1 = 0, ospread2 = 0, orecoil = 0;                                                  //Perfect Shot Offset (inside Player Pointer)
     uintptr_t oScope1 = 0, oScope2 = 0, oScope3 = 0, oScope4 = 0, oScope5 = 0;                          //Steady Aim Offsets (inside Player Pointer)
-    
+    uintptr_t oPlayerY = 0;
+
     //GAME BOOLS
     bool bPerfectShot_S1 = false, bFPS_S1 = false;                                                       //SOCOM 1
     bool bPerfectShot_S2 = false, bFPS_S2 = false, bForceStart_S2 = false;                               //SOCOM 2
@@ -532,13 +532,14 @@ int PCSX2()
     bool bWideScreen = false;                                                                            //SOCOM 2 (cont...)
     bool bPerfectShot_S3 = false, bNoSway_S3 = false, bFPS_S3 = false;                                                       //SOCOM 3
     bool bForceStart_CA = false, bFPS_CA = false, bPerfectShot_CA = false;                               //SOCOM CA
+    bool bYpos_CA = false;
     
     //bool for hacks in threads
     bool HACK_LOOP = false, HACK_LOOP2 = false;
 
     //Strings for MENU indicators
     string sPSHOT = " ", sFPS = "30", sFORCE = " ", sFOG = " ", sBRIGHTNESS = " ", sNVG = " ", sCOLOR = "0", sWIDESCREEN = " ";
-    string sNOSWAY = " ";
+    string sNOSWAY = " ", sDEBUG = " ";
     
     //Empty Value for Read and Write Process Memory
     int value;
@@ -547,6 +548,7 @@ int PCSX2()
     int value4;
     int _flagSway;
     int _flagSway2;
+    int _cPos;
     #pragma endregion
     
     std::cout << "Searching for PCSX2 NightFyre Edition . . ." << std::endl;
@@ -554,33 +556,43 @@ int PCSX2()
 
     // Get proc Id of target process
     DWORD procId = GetProcId(L"PlayStation2.exe");
+    DWORD procId_dev = GetProcId(L"pcsx2DEV.exe");
 
-    if (procId)
+    if (procId || procId_dev)
     {
-        std::cout << "Process found , Thank You for using PCSX2 - NightFyre Edition" << std::endl;
-        Sleep(550);
+        if (procId)
+        {
+            std::cout << "Process found , Thank You for using PCSX2 - NightFyre Edition" << std::endl;
+            Sleep(550);
 
-        std::cout << "Connecting to Process . . ." << std::endl;
-        Sleep(750);
+            std::cout << "Connecting to Process . . ." << std::endl;
+            Sleep(750);
 
-        //Let user know we have established connection with the process
-        std::cout << "Connection Established" << std::endl;
-        Sleep(1050);
+            //Let user know we have established connection with the process
+            std::cout << "Connection Established" << std::endl;
+            Sleep(1050);
 
-        // Get Handle to process
-        hProcess = OpenProcess(PROCESS_ALL_ACCESS, NULL, procId);
-        std::cout << "Gathering Process Information . . ." << std::endl;
-        Sleep(750);
+            // Get Handle to process
+            hProcess = OpenProcess(PROCESS_ALL_ACCESS, NULL, procId);
+            std::cout << "Gathering Process Information . . ." << std::endl;
+            Sleep(750);
 
-        //Get module base address
-        moduleBase = GetModuleBaseAddress(procId, L"PlayStation2.exe");
-        std::cout << "Loading Menu . . ." << std::endl;
-        Sleep(1550);
+            //Get module base address
+            moduleBase = GetModuleBaseAddress(procId, L"PlayStation2.exe");
+            std::cout << "Loading Menu . . ." << std::endl;
+            Sleep(1550);
 
-        // We have a handle to our process , we got the module base address ... 
-        // We are now ready to proceeed to the main hack thread
-        // Start by clearing console and sending some input to user
-        _clearConsole();
+            // We have a handle to our process , we got the module base address ... 
+            // We are now ready to proceeed to the main hack thread
+            // Start by clearing console and sending some input to user
+            _clearConsole();
+        }
+        if (procId_dev)
+        {
+            hProcess = OpenProcess(PROCESS_ALL_ACCESS, NULL, procId_dev);
+            moduleBase = GetModuleBaseAddress(procId_dev, L"PlayStation2.exe");
+            _clearConsole();
+        }
     }
     else
     {
@@ -766,20 +778,28 @@ int PCSX2()
             {
                 bBRIGHTNESS_S2 = !bBRIGHTNESS_S2;
                 
-                int inGAME;
-                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
-                if (inGAME != 0)
+                if (bBRIGHTNESS_S2)
                 {
-                    if (bBRIGHTNESS_S2)
+                    int inGAME;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                    if (inGAME != 0)
                     {
                         sBRIGHTNESS = "X";
                         menuSHOWN = false;
+                        mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                    }
+                    else
+                    {
+                        std::cout << "Please wait until your are in game to use this patch" << std::endl;
+                        Sleep(2000);
                     }
                 }
                 else
                 {
-                    std::cout << "Please wait until your are in game to use this patch" << std::endl;
-                    Sleep(2000);
+                    sBRIGHTNESS = " ";
+                    menuSHOWN = false;
                 }
             }
 
@@ -967,42 +987,45 @@ int PCSX2()
             
             if (bBRIGHTNESS_S2)
             {
-                //Patch 0.0.51
-                //Check if player is in game
-                //If player is not in game , we do not want to change anything
-                int inGAME;
-                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
-                if (inGAME != 0)
-                {
-                    int bFLAG = ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value3, sizeof(value3), nullptr);
-                    if (value3 == 0)
-                    {
-                        mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                        mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                        mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
-                    }
-                }
-                else
-                {
-                    bBRIGHTNESS_S2 = false;
-
-                }
+                //if (!HACK_LOOP2)
+                //{
+                //    HACK_LOOP2 = true;
+                //}
+                ////Patch 0.0.51
+                ////Check if player is in game
+                ////If player is not in game , we do not want to change anything
+                //int inGAME;
+                //ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                //if (inGAME != 0)
+                //{
+                //    int bFLAG = ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value3, sizeof(value3), nullptr);
+                //    if (value3 != 0)
+                //    {
+                //        mem::PatchEx((BYTE*)_S2mapBrightness1, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                //        mem::PatchEx((BYTE*)_S2mapBrightness2, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                //        mem::PatchEx((BYTE*)_S2mapBrightness3, (BYTE*)"\x00\x00\x50\x40", 4, hProcess);
+                //    }
+                //}
+                //else
+                //{
+                //    bBRIGHTNESS_S2 = false;
+                //}
             }
             else if (HACK_LOOP2)
             {
-                ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value4, sizeof(value4), nullptr);
-                if (value4 != 0)
-                {
-                    mem::PS2NopEx((BYTE*)_S2mapBrightness1, 4, hProcess);
-                    mem::PS2NopEx((BYTE*)_S2mapBrightness2, 4, hProcess);
-                    mem::PS2NopEx((BYTE*)_S2mapBrightness3, 4, hProcess);
-                }
-                value3 = 0;
-                value4 = 0;
-                bBRIGHTNESS_S2 = false;
-                HACK_LOOP2 = false;
-                sBRIGHTNESS = " ";
-                menuSHOWN = false;
+                //ReadProcessMemory(hProcess, (BYTE*)_S2mapBrightness1, &value4, sizeof(value4), nullptr);
+                //if (value4 != 0)
+                //{
+                //    //mem::PS2NopEx((BYTE*)_S2mapBrightness1, 4, hProcess);
+                //    //mem::PS2NopEx((BYTE*)_S2mapBrightness2, 4, hProcess);
+                //    //mem::PS2NopEx((BYTE*)_S2mapBrightness3, 4, hProcess);
+                //}
+                //value3 = 0;
+                //value4 = 0;
+                //bBRIGHTNESS_S2 = false;
+                //HACK_LOOP2 = false;
+                //sBRIGHTNESS = " ";
+                //menuSHOWN = false;
             }
 
             //THE FOLLOWING ARE CHECKS IF THE GAME HAS ENDED
@@ -1142,12 +1165,12 @@ int PCSX2()
                 }
                 std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
                 Sleep(1050);
-                _clearConsole();
-                bGAME_SOCOM3 = false;
-                bSOCOM_SERIES_MENU = false;
-                menuSHOWN = false;
-                MAINMENU = false;
-                return 0;
+_clearConsole();
+bGAME_SOCOM3 = false;
+bSOCOM_SERIES_MENU = false;
+menuSHOWN = false;
+MAINMENU = false;
+return 0;
             }
 
             if (bPerfectShot_S3)
@@ -1211,7 +1234,7 @@ int PCSX2()
                 SetConsoleTitle(L"PCSX2 - NightFyre Edition | SOCOM CA - CONSOLE");
                 menuSHOWN = true;
                 _clearConsole();
-                MENU_SOCOMCA(sFPS, sPSHOT, sFORCE);
+                MENU_SOCOMCA(sFPS, sPSHOT, sDEBUG,sFORCE);
             }
 
             //FPS MOD
@@ -1240,6 +1263,25 @@ int PCSX2()
                     _CA_POINTERS_2(oScope1, oScope2, oScope3, oScope4, oScope5, hProcess);
                 }
             }
+
+            //Freeze Y Pos
+            //if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+            //{
+            //    bYpos_CA = !bYpos_CA;
+
+            //    if (bYpos_CA)
+            //    {
+            //        sDEBUG = true;
+            //        menuSHOWN = false;
+            //        oPlayerY = PS2_FindDMAAddy(hProcess, _CAplayerPtr_ADDR, { 0x20 });
+            //        int _InGame;
+            //        int flag = ReadProcessMemory(hProcess, (BYTE*)_CAplayerPtr_ADDR, &_InGame, sizeof(_InGame), nullptr);
+            //        if (flag != 0)
+            //        {
+            //            ReadProcessMemory(hProcess, (BYTE*)oPlayerY, &_cPos, sizeof(_cPos), nullptr);
+            //        }
+            //    }
+            //}
 
             // FORCE START
             if (GetAsyncKeyState(VK_NUMPAD9) & 1)
@@ -1343,6 +1385,10 @@ int PCSX2()
                 }
                 else bPerfectShot_CA = false;
             }
+            if (bYpos_CA)
+            {
+                //WriteProcessMemory(hProcess, (BYTE*)oPlayerY, &_cPos, sizeof(_cPos), nullptr);
+            }
             else if (HACK_LOOP)
             {
                 _PS_OFF(HACK_LOOP, bPerfectShot_CA, menuSHOWN, sPSHOT);
@@ -1359,7 +1405,7 @@ int PCSX2()
     return 0;
 }
 
-//PATCH v0.0.6
+///PATCH v0.0.6
 //UPDATED HACK LOOP
 int FarCry3()
 {
@@ -1560,7 +1606,7 @@ int FarCry3()
     return 0;
 }
 
-//PATCH v0.0.6
+///PATCH v0.0.6
 //UPDATED HACK LOOP
 int AssaultCube()
 {

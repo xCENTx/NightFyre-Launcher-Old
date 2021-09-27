@@ -46,7 +46,7 @@ void _MAINMENU()
                /$$  \ $$                            /$$  | $$                    
               |  $$$$$$/                           |  $$$$$$/                    
                \______/                             \______/                     
-                       v0.0.55 (alpha - [VIP] preview)
+                       v0.0.56 (alpha - [VIP] preview)
 )" << std::endl;
 }
 
@@ -238,13 +238,14 @@ void MENU_SOCOM3(string& FPS, string& PERFECTSHOT, string& NOSWAY)
     std::cout << "|-------SOCOM 3----xCENTx---|" << std::endl;
 }
 
-void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& FORCESTART)
+void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& DEBUG, string& FORCESTART)
 {
     _setConsole();
     std::cout << " ___________________________ \n";
     std::cout << "|----------PATCHES----------|\n";
     std::cout << "|[1] FPS:           => [" << FPS << "] |\n";
     std::cout << "|[2] PERFECT SHOT:  => [" << PERFECTSHOT << "]  |\n";
+    //std::cout << "|[3] DEBUG          => [" << DEBUG << "]  |\n";
     std::cout << "|[9] FORCE START:   => [" << FORCESTART << "]  |\n";
     std::cout << "|[-] MAIN MENU              |\n";
     std::cout << "|[END] QUIT                 |\n";
