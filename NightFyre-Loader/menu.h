@@ -50,9 +50,9 @@ void _artDEATHLYSTILLNESS();
 //MENUS
 void MENU_SOCOM_SELECT();
 void MENU_SOCOM1(string& FPS, string& PERFECTSHOT/*, bool& GAME, bool& MENU*/);
-void MENU_SOCOM2(string& FPS, string& PERFECTSHOT, string& FORCESTART, string& FOG, string& NVG, string& COLOR, string& WIDESCREEN, string& BRIGHTNESS/*, bool& GAME, bool& MENU*/);
+void MENU_SOCOM2(string& FPS, string& PERFECTSHOT, string& FORCESTART, string& FOG, string& NVG, string& COLOR, string& ESP, string& WIDESCREEN, string& BRIGHTNESS/*, bool& GAME, bool& MENU*/);
 void MENU_SOCOM3(string& FPS, string& PERFECTSHOT, string& NOSWAY);
-void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& DEBUG, string& FORCESTART/*, bool& GAME, bool& MENU*/);
+void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& ESP, string& FORCESTART/*, bool& GAME, bool& MENU*/);
 void MENU_FARCRY_3(string& money, string& ammo/*, bool& GAME, bool& MENU*/);
 void MENU_DEATHLY_STILLNESS(string& ammo, string& yPOS);
 

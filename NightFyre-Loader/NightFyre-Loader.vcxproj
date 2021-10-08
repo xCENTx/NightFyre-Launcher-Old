@@ -154,8 +154,15 @@
     <ClInclude Include="menu.h" />
     <ClInclude Include="offsets_socom.h" />
     <ClInclude Include="proc.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="waw.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NightFyre-Loader.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Untitled-1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

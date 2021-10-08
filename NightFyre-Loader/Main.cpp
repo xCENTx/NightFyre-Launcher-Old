@@ -502,6 +502,7 @@ int ePSXe()
 
 // - Need to introduce a single loop for all hacks which will keep anything toggled so the user does not have to manually re activate on each round
 //- FOG , FPS , Crosshair color all reset between rounds
+// 0.57 Added ESP to SOCOM 2 and SOCOM CA (still need to adjust loops)
 int PCSX2()
 {
     //Set Console Window Title
@@ -510,20 +511,71 @@ int PCSX2()
     #pragma region //Establish Variables
     HANDLE hProcess = 0;
     uintptr_t moduleBase = 0;
-    //S2 Perfect Shot
+    
+    #pragma region //SOCOM2
+    //SOCOM 2 Offsets
     uintptr_t oBounce_S2 = 0, oRecoil_S2 = 0, oSpread_S2 = 0;
-    uintptr_t ScopeSway1_S2 = 0, ScopeSway2_S2 = 0, ScopeSway3_S2 = 0, 
-                             ScopeRecoil1_S2 = 0, ScopeRecoil2_S2 = 0;
+    uintptr_t ScopeSway1_S2 = 0, ScopeSway2_S2 = 0, 
+        ScopeSway3_S2 = 0, ScopeRecoil1_S2 = 0, ScopeRecoil2_S2 = 0;
+    uintptr_t oAUTO_S2 = 0, oRAPID_S2 = 0;
+    uintptr_t oPMag1_S2 = 0, oPMag2_S2 = 0, oPMag3_S2 = 0, oEq1_S2 = 0, oHEALTH_S2 = 0;
+    uintptr_t oPlayerX_S2 = 0, oPlayerY_S2 = 0, oPlayerZ_S2 = 0, oTEAMID_S2 = 0, oGunHot_S2 = 0;
+    uintptr_t _PlayerObject;
 
+
+    //ENTITY OFFSETS POINTERS
+    //These Become Addresses
+    uintptr_t eoName_S2 = 0, eoTEAMID_S2 = 0, eoPlayerX_S2 = 0, eoPlayerY_S2 = 0, eoPlayerZ_S2 = 0, eoHEALTH_S2 = 0;
+    uintptr_t originalBASE_S2 = 0;
+    uintptr_t _EntityObjectPointer_S2 = 0;
+    uintptr_t _entityPointerAddress_S2 = 0;
+
+    #pragma endregion
+    
     //S3 Perfect Shot
     uintptr_t oRecoil_S3 = 0, oSpread_S3 = 0;
     uintptr_t oScope1_S3 = 0, oScope2_S3 = 0, oScope3_S3 = 0;
 
-    //CA Perfect Shot
+    #pragma region //SOCOM COMBINED ASSAULT
     uintptr_t ospread1 = 0, ospread2 = 0, orecoil = 0;                                                  //Perfect Shot Offset (inside Player Pointer)
     uintptr_t oScope1 = 0, oScope2 = 0, oScope3 = 0, oScope4 = 0, oScope5 = 0;                          //Steady Aim Offsets (inside Player Pointer)
-    uintptr_t oPlayerY = 0;
+    uintptr_t oHEALTH_CA = 0;
+    uintptr_t oPlayerX_CA = 0, oPlayerY_CA = 0, oPlayerZ_CA = 0, oTEAMID_CA = 0, oGunHot_CA = 0;
+    uintptr_t _PlayerObject_CA;
 
+    //ENTITY OFFSETS POINTERS
+    //These Become Addresses
+    uintptr_t eoName_CA = 0, eoTEAMID_CA = 0, eoPlayerX_CA = 0, eoPlayerY_CA = 0, eoPlayerZ_CA = 0, eoHEALTH_CA = 0;
+    uintptr_t originalBASE_CA = 0;
+    uintptr_t _EntityObjectPointer_CA = 0;
+    uintptr_t _entityPointerAddress_CA = 0;
+    #pragma endregion
+    
+    #pragma region //ESP
+    std::list<uintptr_t> EnemyEntityList;
+    std::list<string> EnemyNameList;
+    uintptr_t _playerNamePointerAddress = 0;
+    
+    //Dynamic Player Values
+    int playerObject;
+    int myTEAMID = 0;
+    float myCHealth;
+    int gunFLAG;
+
+    //Dynamic Entity Values
+    int ENEMY;
+    int arrayEntry;
+    char entityNAME[16];
+    int entityTEAM;
+    float entityHEALTH;
+
+    //Menu
+    bool ESPHACK = false;
+    bool bESP = false;
+    bool etagsON = false;
+    bool etagsOFF = false;
+    #pragma endregion
+    
     //GAME BOOLS
     bool bPerfectShot_S1 = false, bFPS_S1 = false;                                                       //SOCOM 1
     bool bPerfectShot_S2 = false, bFPS_S2 = false, bForceStart_S2 = false;                               //SOCOM 2
@@ -538,7 +590,8 @@ int PCSX2()
     bool HACK_LOOP = false, HACK_LOOP2 = false;
 
     //Strings for MENU indicators
-    string sPSHOT = " ", sFPS = "30", sFORCE = " ", sFOG = " ", sBRIGHTNESS = " ", sNVG = " ", sCOLOR = "0", sWIDESCREEN = " ";
+    string sPSHOT = " ", sFPS = "30", sFORCE = " ", sFOG = " ", sBRIGHTNESS = " ", sNVG = " ", sCOLOR = "0", 
+        sESP = " ", sWIDESCREEN = " ";
     string sNOSWAY = " ", sDEBUG = " ";
     
     //Empty Value for Read and Write Process Memory
@@ -695,6 +748,7 @@ int PCSX2()
             }
         }
  
+        //v0.57 Added ESP
         if (bGAME_SOCOM2)
         {
             if (!menuSHOWN)
@@ -704,7 +758,7 @@ int PCSX2()
 
                 menuSHOWN = true;
                 _clearConsole();
-                MENU_SOCOM2(sFPS, sPSHOT, sFORCE, sFOG, sNVG, sCOLOR, sWIDESCREEN, sBRIGHTNESS);
+                MENU_SOCOM2(sFPS, sPSHOT, sFORCE, sFOG, sNVG, sCOLOR, sESP, sWIDESCREEN, sBRIGHTNESS);
             }
 
             //FPS MOD
@@ -882,9 +936,72 @@ int PCSX2()
                     Sleep(2000);
                 }
             }
+            
+            //ESP Hack (RENEGADE + NightFyre)
+            if (GetAsyncKeyState(VK_NUMPAD7) & 1)
+            {
+                bESP = !bESP;
+                if (bESP)
+                {
+                    //First lets check if player is in game
+                    int gameFLAG;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &gameFLAG, sizeof(gameFLAG), nullptr);
+                    if (gameFLAG != 0)
+                    {
+                        oTEAMID_S2 = PS2_FindDMAAddy(hProcess, _S2playerPTR, { 0xC8 });
+                        oGunHot_S2 = PS2_FindDMAAddy(hProcess, _S2playerPTR, { 0xF74 });
+                        oHEALTH_S2 = PS2_FindDMAAddy(hProcess, _S2playerPTR, { 0x1044 });
+                        ReadProcessMemory(hProcess, (LPVOID)oTEAMID_S2, &myTEAMID, sizeof(myTEAMID), nullptr);
+                        ReadProcessMemory(hProcess, (LPVOID)oHEALTH_S2, &myCHealth, sizeof(myCHealth), nullptr);
+                        ReadProcessMemory(hProcess, (LPVOID)_S2BaseEntityPointer, &arrayEntry, sizeof(arrayEntry), nullptr);
+                        ReadProcessMemory(hProcess, (LPVOID)_S2playerPTR, &playerObject, sizeof(playerObject), nullptr);
+                        _PlayerObject = playerObject + 0x20000000;
+                        _EntityObjectPointer_S2 = arrayEntry + 0x20000000;
+                        originalBASE_S2 = _EntityObjectPointer_S2;
+
+                        //ONLINE
+                        if (myTEAMID == 0x40000001)
+                        {
+                            ENEMY = 0x80000100;
+                        }
+                        else if (myTEAMID == 0x80000100)
+                        {
+                            ENEMY = 0x40000001;
+                        }
+
+                        //CAMPAIGN
+                        if (myTEAMID == 0x84000006)
+                        {
+                            ENEMY = 0x40004000;
+                        }
+                        ESPHACK = true;
+                    }
+                }
+                else
+                {
+                    //ETAGS OFF
+                    if (!etagsOFF)
+                    {
+                        etagsON = false;
+                        for (uintptr_t val : EnemyEntityList)
+                        {
+                            WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                        }
+                        EnemyNameList.clear();
+                        EnemyEntityList.clear();
+                        etagsOFF = true;
+                    }
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                    menuSHOWN = false;
+                }
+            }
 
             //WIDESCREEN PATCH (Harry62)
-            if (GetAsyncKeyState(VK_NUMPAD7) & 1)
+            if (GetAsyncKeyState(VK_NUMPAD8) & 1)
             {
                 bWideScreen = !bWideScreen;
                 if (bWideScreen)
@@ -919,6 +1036,20 @@ int PCSX2()
                 Sleep(1050);
                 SOCOM::_return(hProcess, menuSHOWN, bFPS_S2, sFPS, bPerfectShot_S2, sPSHOT, HACK_LOOP, bFOG_S2, sFOG, 
                     bBRIGHTNESS_S2, bNVG_S2, sNVG, bCCOLOR_S2, sCOLOR, bWideScreen, sWIDESCREEN);
+                if (bESP)
+                {
+                    for (uintptr_t val : EnemyEntityList)
+                    {
+                        WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                    }
+                    EnemyNameList.clear();
+                    EnemyEntityList.clear();
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                }
                 std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
                 Sleep(1050);
                 _clearConsole();
@@ -934,6 +1065,20 @@ int PCSX2()
                 std::cout << "RESTORING DEFAULTS . . . ." << std::endl;
                 Sleep(1050);
                 SOCOM::_return(hProcess, menuSHOWN, bFPS_S2, sFPS, bPerfectShot_S2, sPSHOT, HACK_LOOP, bFOG_S2, sFOG, bBRIGHTNESS_S2, bNVG_S2, sNVG, bCCOLOR_S2, sCOLOR, bWideScreen, sWIDESCREEN);
+                if (bESP)
+                {
+                    for (uintptr_t val : EnemyEntityList)
+                    {
+                        WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                    }
+                    EnemyNameList.clear();
+                    EnemyEntityList.clear();
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                }
                 std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
                 Sleep(1050);
                 _clearConsole();
@@ -945,7 +1090,7 @@ int PCSX2()
             }
 
             //PROF. LUPIN
-            //THE FOLLOWING PATCHES EXECUTE EVERY 10 SECONDS
+            //THE FOLLOWING PATCHES EXECUTE EVERY 10ms
             //FURTHERMORE, CHECKS IF PLAYER IS IN GAME ARE MADE
             //IF PLAYER IS NOT IN GAME , DEFAULTS ARE RESTORED IF NOT ALREADY
             //AS WELL AS, METHOD WILL WAIT FOR PLAYER TO BE IN GAME AGAIN.
@@ -953,11 +1098,16 @@ int PCSX2()
             //AS SOON AS A MATCH RESTARTS , THE PATCH WILL BE APPLIED AGAIN
             if (bPerfectShot_S2)
             {
+                //Check player pointer value
                 int flag = ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &value, sizeof(value), nullptr);
                 int flag2 = ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &value2, sizeof(value2), nullptr);
+                
+                //If player pointer value is not 0 , we are in a game
                 if (value != 0)
                 {
-                    int FLAG = ReadProcessMemory(hProcess, (LPVOID)oRecoil_S2, &value, sizeof(value), nullptr);
+                    //
+                    int FLAG = ReadProcessMemory(hProcess, (LPVOID)oSpread_S2, &value, sizeof(value), nullptr);
+                    int FLAG2 = ReadProcessMemory(hProcess, (LPVOID)ScopeSway1_S2, &value2, sizeof(value2), nullptr);
                     if (!HACK_LOOP)
                     {
                         _PS_ON(menuSHOWN, HACK_LOOP, sPSHOT);
@@ -976,7 +1126,13 @@ int PCSX2()
                         mem::PS2NopEx((BYTE*)ScopeSway3_S2, 4, hProcess);
                     }
                 }
-                else bPerfectShot_S2 = false;
+                else
+                {
+                    //In between rounds and when not in games
+                    //bPerfectShot_S2 = false;
+                    value = 0;
+                    value2 = 0;
+                }
             }
             else if (HACK_LOOP)
             {
@@ -985,8 +1141,134 @@ int PCSX2()
                 value2 = 0;
             }
             
+            //Shows all players as enemies OR all players as teamate
+            //Basically changes TEAM ID of all players , using games own logic to display all players on screen
+            if (ESPHACK)
+            {
+                //First lets check if player is in game
+                int gameFLAG;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &gameFLAG, sizeof(gameFLAG), nullptr);
+                if (gameFLAG != 0)
+                {
+                    //Check if player is alive
+                    ReadProcessMemory(hProcess, (BYTE*)oHEALTH_S2, &myCHealth, sizeof(myCHealth), nullptr);
+                    if (myCHealth != 0)
+                    {
+                        //if gun is not hot , display etags
+                        ReadProcessMemory(hProcess, (LPVOID)oGunHot_S2, &gunFLAG, sizeof(gunFLAG), nullptr);
+                        if (gunFLAG != 1)
+                        {
+                            //ETAGS ON
+                            if (!etagsON)
+                            {
+                                _clearConsole();
+                                etagsOFF = false;
+                                //Gets all entities in the session
+                                do
+                                {
+                                    _entityPointerAddress_S2 = _EntityObjectPointer_S2 + 0x08;
+
+                                    //Establish Variables and Resolve Pointer Chains
+                                    _entityPointerAddress_S2 = _EntityObjectPointer_S2 + 0x08;
+                                    eoName_S2 = PS2_FindDMAAddy(hProcess, _entityPointerAddress_S2, { 0x14 });
+                                    eoTEAMID_S2 = PS2_FindDMAAddy(hProcess, _entityPointerAddress_S2, { 0xC8 });
+                                    eoHEALTH_S2 = PS2_FindDMAAddy(hProcess, _entityPointerAddress_S2, { 0x1044 });
+
+                                    int name;
+                                    ReadProcessMemory(hProcess, (LPVOID)eoName_S2, &name, sizeof(name), nullptr);
+                                    int offset = name + 0x20000000;
+                                    ReadProcessMemory(hProcess, (LPVOID)offset, &entityNAME, sizeof(entityNAME), nullptr);
+                                    ReadProcessMemory(hProcess, (LPVOID)eoTEAMID_S2, &entityTEAM, sizeof(entityTEAM), nullptr);
+                                    ReadProcessMemory(hProcess, (LPVOID)eoHEALTH_S2, &entityHEALTH, sizeof(entityHEALTH), nullptr);
+
+                                    string nameFLAG = entityNAME;
+                                    //We don't ever want change our teamID
+                                    if (eoTEAMID_S2 != oTEAMID_S2)
+                                    {
+                                        //only change entities of different teamID
+                                        if (entityTEAM != myTEAMID)
+                                        {
+                                            if (entityHEALTH != 0)
+                                            {
+                                                //Multiplayer ESP
+                                                if (entityTEAM == 0x40000001 || entityTEAM == 0x800001000)
+                                                {
+                                                    EnemyEntityList.push_back(eoTEAMID_S2);
+                                                    WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_S2, &myTEAMID, sizeof(myTEAMID), nullptr);
+                                                }
+                                                else if (myTEAMID == 0x84000006)
+                                                {
+                                                    if (entityTEAM != 0x8400000A)
+                                                    {
+                                                        EnemyEntityList.push_back(eoTEAMID_S2);
+                                                        EnemyNameList.push_back(nameFLAG);
+                                                        WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_S2, &myTEAMID, sizeof(myTEAMID), nullptr);
+                                                    }
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                    //Loop for next player info
+                                    ReadProcessMemory(hProcess, (LPVOID)_EntityObjectPointer_S2, &arrayEntry, sizeof(arrayEntry), nullptr);
+                                    _EntityObjectPointer_S2 = arrayEntry + 0x20000000;
+
+                                } while (_EntityObjectPointer_S2 != originalBASE_S2);
+                                etagsON = true;
+                                sESP = "X";
+                                menuSHOWN = false;
+                            }
+                        }
+                        else
+                        {
+                            //ETAGS OFF
+                            if (!etagsOFF)
+                            {
+                                etagsON = false;
+                                std::cout << "ETAGS DISABLED WHILE GUN HOT \nALL ALIVE ENEMIES:\n";
+                                for (string name : EnemyNameList)
+                                {
+                                    std::cout << name << std::endl;
+                                }
+                                for (uintptr_t val : EnemyEntityList)
+                                {
+                                    WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                                }
+                                EnemyNameList.clear();
+                                EnemyEntityList.clear();
+                                etagsOFF = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    EnemyNameList.clear();
+                    EnemyEntityList.clear();
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                    menuSHOWN = false;
+                }
+            }
+
+            //Adjustments made , no longer in use. 
+            //Offline users will just have to toggle upon mission restart , death and pause menu interaction
             if (bBRIGHTNESS_S2)
             {
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME == 0)
+                {
+                    bBRIGHTNESS_S2 = false;
+                    sBRIGHTNESS = " ";
+                    menuSHOWN = false;
+                }
                 //if (!HACK_LOOP2)
                 //{
                 //    HACK_LOOP2 = true;
@@ -1028,39 +1310,45 @@ int PCSX2()
                 //menuSHOWN = false;
             }
 
-            //THE FOLLOWING ARE CHECKS IF THE GAME HAS ENDED
-            //AS SOON AS THE GAME ENDS, PATCHES WILL ALL RETURN DEFAULT VALUE
-            //THIS SHOULD HAPPEN BEFORE RETURNING TO LOBBY
-            //THIS WILL ALSO HAPPEN IN BETWEEN ROUNDS , USER WILL NEED TO TOGGLE AGAIN
+            //Everything below will reset to default whenever the game ends and between rounds
             if (bFOG_S2)
             {
                 int inGAME;
                 ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
                 if (inGAME == 0)
                 {
+                    bFOG_S2 = false;
                     sFOG = " ";
                     menuSHOWN = false;
                     mem::PatchEx((BYTE*)_S2fog_ADDR, (BYTE*)"\x01\x00\x00\x00", 4, hProcess);
                 }
             }
 
-            if (bCCOLOR_S2)
+            if (color1 || color2 || color3 || color4)
             {
                 int inGAME;
                 ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
                 if (inGAME == 0)
                 {
-                    int a;
-                    ReadProcessMemory(hProcess, (BYTE*)_S2crosshairR, &a, sizeof(a), nullptr);
-                    if (a != 1128792064)
-                    {
-                        mem::PatchEx((BYTE*)_S2crosshairR, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
-                        mem::PatchEx((BYTE*)_S2crosshairG, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
-                        mem::PatchEx((BYTE*)_S2crosshairB, (BYTE*)"\x00\x00\xC0\x41", 4, hProcess);
-                        sCOLOR = "0";
-                        bCCOLOR_S2 = false;
-                        menuSHOWN = false;
-                    }
+                    mem::PatchEx((BYTE*)_S2crosshairR, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
+                    mem::PatchEx((BYTE*)_S2crosshairG, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
+                    mem::PatchEx((BYTE*)_S2crosshairB, (BYTE*)"\x00\x00\xC0\x41", 4, hProcess);
+                    sCOLOR = "0";
+                    color1, color2, color3, color4 = false;
+                    color0 = true;
+                    bCCOLOR_S2 = false;
+                    menuSHOWN = false;
+                }
+            }
+
+            if (bWideScreen)
+            {
+                int inGAME;
+                ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
+                if (inGAME == 0)
+                {
+                    bWideScreen = false;
+                    _WIDESCREEN_S2_OFF(sWIDESCREEN, menuSHOWN, hProcess);
                 }
             }
 
@@ -1070,6 +1358,7 @@ int PCSX2()
                 ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
                 if (inGAME == 0)
                 {
+                    bFPS_S2 = false;
                     _FPS_OFF(sFPS, menuSHOWN, _S2fps1_ADDR, hProcess);
                 }
             }
@@ -1227,6 +1516,7 @@ return 0;
             }
         }
 
+        //v0.57 Added ESP
         if (bGAME_SOCOMCA)
         {
             if (!menuSHOWN)
@@ -1234,7 +1524,7 @@ return 0;
                 SetConsoleTitle(L"PCSX2 - NightFyre Edition | SOCOM CA - CONSOLE");
                 menuSHOWN = true;
                 _clearConsole();
-                MENU_SOCOMCA(sFPS, sPSHOT, sDEBUG,sFORCE);
+                MENU_SOCOMCA(sFPS, sPSHOT, sESP, sFORCE);
             }
 
             //FPS MOD
@@ -1264,24 +1554,67 @@ return 0;
                 }
             }
 
-            //Freeze Y Pos
-            //if (GetAsyncKeyState(VK_NUMPAD3) & 1)
-            //{
-            //    bYpos_CA = !bYpos_CA;
+            if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+            {
+                bESP = !bESP;
+                if (bESP)
+                {
+                    //First lets check if player is in game
+                    int gameFLAG;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &gameFLAG, sizeof(gameFLAG), nullptr);
+                    if (gameFLAG != 0)
+                    {
+                        oTEAMID_CA = PS2_FindDMAAddy(hProcess, _CAplayerPtr_ADDR, { 0xD8 });
+                        oGunHot_CA = PS2_FindDMAAddy(hProcess, _CAplayerPtr_ADDR, { 0x938 });
+                        oHEALTH_CA = PS2_FindDMAAddy(hProcess, _CAplayerPtr_ADDR, { 0x93C });
+                        ReadProcessMemory(hProcess, (LPVOID)oTEAMID_CA, &myTEAMID, sizeof(myTEAMID), nullptr);
+                        ReadProcessMemory(hProcess, (LPVOID)oHEALTH_CA, &myCHealth, sizeof(myCHealth), nullptr);
+                        ReadProcessMemory(hProcess, (LPVOID)_CABaseEntityPointer, &arrayEntry, sizeof(arrayEntry), nullptr);
+                        ReadProcessMemory(hProcess, (LPVOID)_CAplayerPtr_ADDR, &playerObject, sizeof(playerObject), nullptr);
+                        _PlayerObject = playerObject + 0x20000000;
+                        _EntityObjectPointer_CA = arrayEntry + 0x20000000;
+                        originalBASE_CA = _EntityObjectPointer_CA;
 
-            //    if (bYpos_CA)
-            //    {
-            //        sDEBUG = true;
-            //        menuSHOWN = false;
-            //        oPlayerY = PS2_FindDMAAddy(hProcess, _CAplayerPtr_ADDR, { 0x20 });
-            //        int _InGame;
-            //        int flag = ReadProcessMemory(hProcess, (BYTE*)_CAplayerPtr_ADDR, &_InGame, sizeof(_InGame), nullptr);
-            //        if (flag != 0)
-            //        {
-            //            ReadProcessMemory(hProcess, (BYTE*)oPlayerY, &_cPos, sizeof(_cPos), nullptr);
-            //        }
-            //    }
-            //}
+                        //ONLINE
+                        if (myTEAMID == 0x40000001)
+                        {
+                            ENEMY = 0x80000100;
+                        }
+                        else if (myTEAMID == 0x80000100)
+                        {
+                            ENEMY = 0x40000001;
+                        }
+
+                        //CAMPAIGN
+                        if (myTEAMID == 0x84000006)
+                        {
+                            ENEMY = 0x40004000;
+                        }
+                        ESPHACK = true;
+                    }
+                }
+                else
+                {
+                    //ETAGS OFF
+                    if (!etagsOFF)
+                    {
+                        etagsON = false;
+                        for (uintptr_t val : EnemyEntityList)
+                        {
+                            WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                        }
+                        EnemyNameList.clear();
+                        EnemyEntityList.clear();
+                        etagsOFF = true;
+                    }
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                    menuSHOWN = false;
+                }
+            }
 
             // FORCE START
             if (GetAsyncKeyState(VK_NUMPAD9) & 1)
@@ -1316,6 +1649,20 @@ return 0;
                 {
                     _FORCESTART_CA_OFF(sFORCE, menuSHOWN, hProcess);
                 }
+                if (bESP)
+                {
+                    for (uintptr_t val : EnemyEntityList)
+                    {
+                        WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                    }
+                    EnemyNameList.clear();
+                    EnemyEntityList.clear();
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                }
                 std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
                 Sleep(1050);
                 _clearConsole();
@@ -1341,6 +1688,20 @@ return 0;
                 if (bForceStart_CA)
                 {
                     _FORCESTART_CA_OFF(sFORCE, menuSHOWN, hProcess);
+                }
+                if (bESP)
+                {
+                    for (uintptr_t val : EnemyEntityList)
+                    {
+                        WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                    }
+                    EnemyNameList.clear();
+                    EnemyEntityList.clear();
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
                 }
                 std::cout << "SUCCESFULLY RESTORED DATA TO DEFAULTS , RETURNING TO MENU" << std::endl;
                 Sleep(1050);
@@ -1385,13 +1746,123 @@ return 0;
                 }
                 else bPerfectShot_CA = false;
             }
-            if (bYpos_CA)
-            {
-                //WriteProcessMemory(hProcess, (BYTE*)oPlayerY, &_cPos, sizeof(_cPos), nullptr);
-            }
             else if (HACK_LOOP)
             {
                 _PS_OFF(HACK_LOOP, bPerfectShot_CA, menuSHOWN, sPSHOT);
+            }
+            //COMBINED ASSAULT ESP (VIP OPTION)
+            if (ESPHACK)
+            {
+                //First lets check if player is in game
+                int gameFLAG;
+                ReadProcessMemory(hProcess, (BYTE*)_CAplayerPtr_ADDR, &gameFLAG, sizeof(gameFLAG), nullptr);
+                if (gameFLAG != 0)
+                {
+                    //Check if player is alive
+                    ReadProcessMemory(hProcess, (BYTE*)oHEALTH_CA, &myCHealth, sizeof(myCHealth), nullptr);
+                    if (myCHealth != 0)
+                    {
+                        //if gun is not hot , display etags
+                        ReadProcessMemory(hProcess, (LPVOID)oGunHot_CA, &gunFLAG, sizeof(gunFLAG), nullptr);
+                        if (gunFLAG != 1)
+                        {
+                            //ETAGS ON
+                            if (!etagsON)
+                            {
+                                _clearConsole();
+                                etagsOFF = false;
+                                //Gets all entities in the session
+                                do
+                                {
+                                    _entityPointerAddress_CA = _EntityObjectPointer_CA + 0x08;
+
+                                    //Establish Variables and Resolve Pointer Chains
+                                    _entityPointerAddress_CA = _EntityObjectPointer_CA + 0x08;
+                                    eoName_CA = PS2_FindDMAAddy(hProcess, _entityPointerAddress_CA, { 0x14 });
+                                    eoTEAMID_CA = PS2_FindDMAAddy(hProcess, _entityPointerAddress_CA, { 0xC8 });
+                                    eoHEALTH_CA = PS2_FindDMAAddy(hProcess, _entityPointerAddress_CA, { 0x1044 });
+
+                                    int name;
+                                    ReadProcessMemory(hProcess, (LPVOID)eoName_CA, &name, sizeof(name), nullptr);
+                                    int offset = name + 0x20000000;
+                                    ReadProcessMemory(hProcess, (LPVOID)offset, &entityNAME, sizeof(entityNAME), nullptr);
+                                    ReadProcessMemory(hProcess, (LPVOID)eoTEAMID_CA, &entityTEAM, sizeof(entityTEAM), nullptr);
+                                    ReadProcessMemory(hProcess, (LPVOID)eoHEALTH_CA, &entityHEALTH, sizeof(entityHEALTH), nullptr);
+
+                                    string nameFLAG = entityNAME;
+                                    //We don't ever want change our teamID
+                                    if (eoTEAMID_CA != oTEAMID_CA)
+                                    {
+                                        //only change entities of different teamID
+                                        if (entityTEAM != myTEAMID)
+                                        {
+                                            if (entityHEALTH != 0)
+                                            {
+                                                //Multiplayer ESP
+                                                if (entityTEAM == 0x40000001 || entityTEAM == 0x800001000)
+                                                {
+                                                    EnemyEntityList.push_back(eoTEAMID_CA);
+                                                    WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_CA, &myTEAMID, sizeof(myTEAMID), nullptr);
+                                                }
+                                                else if (myTEAMID == 0x84000006)
+                                                {
+                                                    if (entityTEAM != 0x8400000A)
+                                                    {
+                                                        EnemyEntityList.push_back(eoTEAMID_CA);
+                                                        EnemyNameList.push_back(nameFLAG);
+                                                        WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_CA, &myTEAMID, sizeof(myTEAMID), nullptr);
+                                                    }
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                    //Loop for next player info
+                                    ReadProcessMemory(hProcess, (LPVOID)_EntityObjectPointer_CA, &arrayEntry, sizeof(arrayEntry), nullptr);
+                                    _EntityObjectPointer_CA = arrayEntry + 0x20000000;
+
+                                } while (_EntityObjectPointer_CA != originalBASE_CA);
+                                etagsON = true;
+                                sESP = "X";
+                                menuSHOWN = false;
+                            }
+                        }
+                        else
+                        {
+                            //ETAGS OFF
+                            if (!etagsOFF)
+                            {
+                                etagsON = false;
+                                std::cout << "ETAGS DISABLED WHILE GUN HOT \nALL ALIVE ENEMIES:\n";
+                                for (string name : EnemyNameList)
+                                {
+                                    std::cout << name << std::endl;
+                                }
+                                for (uintptr_t val : EnemyEntityList)
+                                {
+                                    WriteProcessMemory(hProcess, (LPVOID)val, &ENEMY, sizeof(ENEMY), nullptr);
+                                }
+                                EnemyNameList.clear();
+                                EnemyEntityList.clear();
+                                etagsOFF = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    EnemyNameList.clear();
+                    EnemyEntityList.clear();
+                    ESPHACK = false;
+                    bESP = false;
+                    etagsOFF = false;
+                    etagsON = false;
+                    sESP = " ";
+                    menuSHOWN = false;
+                }
             }
         }
 

@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <TlHelp32.h>
 #include <string>
+#include <list>
 using namespace std;
 
 //Helpers

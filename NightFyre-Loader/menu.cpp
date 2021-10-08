@@ -30,10 +30,10 @@ void _MAINMENU()
     std::cout << "      | [5] Final Fantasy 7  (ePSXe)|  |  - UnknownCheats.com     |\n";
     std::cout << "      | [6] Assault Cube            |  |  - Cronotrigga           |\n";
     std::cout << "      | [7]                         |  |  - bismofunyuns          |\n";
-    std::cout << "      | [8]                         |  |  - Bravo                 |\n";
-    std::cout << "      | [9] Deathly Stillness       |  |  - Harry62               |\n";
-    std::cout << "      | [END] EXIT                  |  |                          |\n";
-    std::cout << "      |----------NightFyre----------|  |--------------------------|\n";
+    std::cout << "      | [8]                         |  |  - RENEGADE              |\n";
+    std::cout << "      | [9] Deathly Stillness       |  |  - Bravo                 |\n";
+    std::cout << "      | [END] EXIT                  |  |  - Harry62               |\n";
+    std::cout << "      |----------NightFyre----------|  |----------L0AD3R------VIP-|v0.57\n";
     std::cout << R"(
  /$$   /$$ /$$           /$$         /$$     /$$$$$$$$                           
 | $$$ | $$|__/          | $$        | $$    | $$_____/                           
@@ -46,7 +46,6 @@ void _MAINMENU()
                /$$  \ $$                            /$$  | $$                    
               |  $$$$$$/                           |  $$$$$$/                    
                \______/                             \______/                     
-                       v0.0.56 (alpha - [VIP] preview)
 )" << std::endl;
 }
 
@@ -207,19 +206,20 @@ void MENU_SOCOM1(string& FPS, string& PERFECTSHOT)
     std::cout << "|-------SOCOM 1----xCENTx---|" << std::endl;
 }
 
-void MENU_SOCOM2(string& FPS, string& PERFECTSHOT, string& FORCESTART, string& FOG, string& NVG, string& COLOR, string& WIDESCREEN, string& BRIGHTNESS)
+void MENU_SOCOM2(string& FPS, string& PERFECTSHOT, string& FORCESTART, string& FOG, string& NVG, string& COLOR, string& ESP, string& WIDESCREEN, string& BRIGHTNESS)
 {
     _setConsole();
     std::cout << " ______________________________ \n";
     std::cout << "|------------PATCHES-----------|\n";
-    std::cout << "|[1] FPS MOD:          => [" << FPS << "] |\n";
-    std::cout << "|[2] PERFECT SHOT:     => [" << PERFECTSHOT << "]  |\n";
-    std::cout << "|[3] MAP FOG:          => [" << FOG << "]  |\n";
-    std::cout << "|[4] BRIGHTNESS:       => [" << BRIGHTNESS << "]  |\n";
-    std::cout << "|[5] NVG PATCH - bismo => [" << NVG << "]  |\n";
+    std::cout << "|[1] FPS MOD           => [" << FPS << "] |\n";
+    std::cout << "|[2] PERFECT SHOT      => [" << PERFECTSHOT << "]  |\n";
+    std::cout << "|[3] MAP FOG           => [" << FOG << "]  |\n";
+    std::cout << "|[4] BRIGHTNESS        => [" << BRIGHTNESS << "]  |\n";
+    std::cout << "|[5] NVG PATCH         => [" << NVG << "]  |\n";
     std::cout << "|[6] CROSSHAIR COLOR   => [" << COLOR << "]  |\n";
-    std::cout << "|[7] WIDESCREEN MOD    => [" << WIDESCREEN << "]  |\n";
-    std::cout << "|[9] FORCE START:      => [" << FORCESTART << "]  |\n";
+    std::cout << "|[7] WALLHACKS (ESP)   => [" << ESP << "]  |\n";
+    std::cout << "|[8] WIDESCREEN MOD    => [" << WIDESCREEN << "]  |\n";
+    std::cout << "|[9] FORCE START       => [" << FORCESTART << "]  |\n";
     std::cout << "|[-] MAIN MENU                 |\n";
     std::cout << "|[END] QUIT                    |\n";
     std::cout << "|--------SOCOM 2-----xCENTx----|" << std::endl;
@@ -238,15 +238,15 @@ void MENU_SOCOM3(string& FPS, string& PERFECTSHOT, string& NOSWAY)
     std::cout << "|-------SOCOM 3----xCENTx---|" << std::endl;
 }
 
-void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& DEBUG, string& FORCESTART)
+void MENU_SOCOMCA(string& FPS, string& PERFECTSHOT, string& ESP, string& FORCESTART)
 {
     _setConsole();
     std::cout << " ___________________________ \n";
     std::cout << "|----------PATCHES----------|\n";
-    std::cout << "|[1] FPS:           => [" << FPS << "] |\n";
-    std::cout << "|[2] PERFECT SHOT:  => [" << PERFECTSHOT << "]  |\n";
-    //std::cout << "|[3] DEBUG          => [" << DEBUG << "]  |\n";
-    std::cout << "|[9] FORCE START:   => [" << FORCESTART << "]  |\n";
+    std::cout << "|[1] FPS            => [" << FPS << "] |\n";
+    std::cout << "|[2] PERFECT SHOT   => [" << PERFECTSHOT << "]  |\n";
+    std::cout << "|[3] WALLHACKS ESP  => [" << ESP << "]  |\n";
+    std::cout << "|[9] FORCE START    => [" << FORCESTART << "]  |\n";
     std::cout << "|[-] MAIN MENU              |\n";
     std::cout << "|[END] QUIT                 |\n";
     std::cout << "|------COMBINED ASSAULT-----|" << std::endl;

@@ -14,6 +14,7 @@ extern uintptr_t _S1perfectshot4_ADDR;
 
 //SOCOM 2
 extern uintptr_t _S2playerPTR;				// Player Object
+extern uintptr_t _S2BaseEntityPointer;	    // Entity Object
 extern uintptr_t _S2fps1_ADDR;
 extern uintptr_t _S2fps2_ADDR;
 extern uintptr_t _S2fog_ADDR;
@@ -37,6 +38,7 @@ extern uintptr_t _S3fps2_ADDR;
 
 //COMBINED ASSAULT
 extern uintptr_t _CAplayerPtr_ADDR;        // Player Object
+extern uintptr_t _CABaseEntityPointer;
 extern uintptr_t _CAforcestart_ADDR;       // ONLINE / LAN Force Start Match
 extern uintptr_t _CAfps1_ADDR;             // Frame Rate
 extern uintptr_t _CAfps2_ADDR;             // ""
