@@ -1191,9 +1191,10 @@ int PCSX2()
                                             if (entityHEALTH != 0)
                                             {
                                                 //Multiplayer ESP
-                                                if (entityTEAM == 0x40000001 || entityTEAM == 0x800001000)
+                                                if (entityTEAM == 0x40000001 || entityTEAM == 0x80000100)
                                                 {
                                                     EnemyEntityList.push_back(eoTEAMID_S2);
+                                                    EnemyNameList.push_back(nameFLAG);
                                                     WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_S2, &myTEAMID, sizeof(myTEAMID), nullptr);
                                                 }
                                                 else if (myTEAMID == 0x84000006)
@@ -1330,14 +1331,16 @@ int PCSX2()
                 ReadProcessMemory(hProcess, (BYTE*)_S2playerPTR, &inGAME, sizeof(inGAME), nullptr);
                 if (inGAME == 0)
                 {
-                    mem::PatchEx((BYTE*)_S2crosshairR, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
-                    mem::PatchEx((BYTE*)_S2crosshairG, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
-                    mem::PatchEx((BYTE*)_S2crosshairB, (BYTE*)"\x00\x00\xC0\x41", 4, hProcess);
-                    sCOLOR = "0";
-                    color1, color2, color3, color4 = false;
-                    color0 = true;
-                    bCCOLOR_S2 = false;
-                    menuSHOWN = false;
+                    int a;
+                    ReadProcessMemory(hProcess, (BYTE*)_S2crosshairR, &a, sizeof(a), nullptr);
+                    if (a != 1128792064)
+                    {
+                        mem::PatchEx((BYTE*)_S2crosshairR, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2crosshairG, (BYTE*)"\x00\x00\x48\x43", 4, hProcess);
+                        mem::PatchEx((BYTE*)_S2crosshairB, (BYTE*)"\x00\x00\xC0\x41", 4, hProcess);
+                        sCOLOR = "0";
+                        bCCOLOR_S2 = false;
+                    }
                 }
             }
 
@@ -1554,6 +1557,7 @@ return 0;
                 }
             }
 
+            //ESP
             if (GetAsyncKeyState(VK_NUMPAD3) & 1)
             {
                 bESP = !bESP;
@@ -1585,11 +1589,11 @@ return 0;
                             ENEMY = 0x40000001;
                         }
 
-                        //CAMPAIGN
-                        if (myTEAMID == 0x84000006)
-                        {
-                            ENEMY = 0x40004000;
-                        }
+                        ////CAMPAIGN
+                        //if (myTEAMID == 0x84000006)
+                        //{
+                        //    ENEMY = 0x40004000;
+                        //}
                         ESPHACK = true;
                     }
                 }
@@ -1750,6 +1754,7 @@ return 0;
             {
                 _PS_OFF(HACK_LOOP, bPerfectShot_CA, menuSHOWN, sPSHOT);
             }
+
             //COMBINED ASSAULT ESP (VIP OPTION)
             if (ESPHACK)
             {
@@ -1799,25 +1804,23 @@ return 0;
                                             if (entityHEALTH != 0)
                                             {
                                                 //Multiplayer ESP
-                                                if (entityTEAM == 0x40000001 || entityTEAM == 0x800001000)
+                                                if (entityTEAM == 0x40000001 || entityTEAM == 0x80000100)
                                                 {
                                                     EnemyEntityList.push_back(eoTEAMID_CA);
+                                                    EnemyNameList.push_back(nameFLAG);
                                                     WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_CA, &myTEAMID, sizeof(myTEAMID), nullptr);
                                                 }
-                                                else if (myTEAMID == 0x84000006)
-                                                {
-                                                    if (entityTEAM != 0x8400000A)
-                                                    {
-                                                        EnemyEntityList.push_back(eoTEAMID_CA);
-                                                        EnemyNameList.push_back(nameFLAG);
-                                                        WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_CA, &myTEAMID, sizeof(myTEAMID), nullptr);
-                                                    }
-                                                }
-
+                                                //else if (myTEAMID == 0x84000006)
+                                                //{
+                                                //    if (entityTEAM != 0x8400000A)
+                                                //    {
+                                                //        EnemyEntityList.push_back(eoTEAMID_CA);
+                                                //        EnemyNameList.push_back(nameFLAG);
+                                                //        WriteProcessMemory(hProcess, (LPVOID)eoTEAMID_CA, &myTEAMID, sizeof(myTEAMID), nullptr);
+                                                //    }
+                                                //}
                                             }
-
                                         }
-
                                     }
 
                                     //Loop for next player info
